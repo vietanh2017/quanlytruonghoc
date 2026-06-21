@@ -1,0 +1,33 @@
+# Python
+__pycache__/
+*.pyc
+
+# Database
+*.db
+
+# Logs
+logs/
+
+# Uploads
+uploads/
+
+# Backup
+backups/
+restore_temp/
+temp/
+
+# React
+node_modules/
+frontend/node_modules/
+frontend/dist/
+
+# Environment
+.env
+.venv/
+venv/
+
+# VSCode
+.vscode/
+# Export files
+data/exports/*.xlsx
+data/exports/*.xls

@@ -1,0 +1,82 @@
+/* Style nút như ảnh - nền trắng, viền đen, chữ đen */
+QPushButton {
+    border: 1.5px solid #333333;
+    border-radius: 6px;
+    padding: 6px 16px;
+    font-size: 12px;
+    font-weight: 500;
+    background: white;
+    color: #333333;
+    min-width: 80px;
+}
+
+QPushButton:hover {
+    background: #F5F5F5;
+    border-color: #1D9E75;
+    color: #1D9E75;
+}
+
+QPushButton:pressed {
+    background: #E8E8E8;
+}
+
+QPushButton:disabled {
+    background: #F5F5F5;
+    border-color: #CCCCCC;
+    color: #999999;
+}
+
+/* Riêng nút Thêm - có thể đổi màu nền xanh nhạt */
+QPushButton#btn_primary {
+    background: #E8F5E9;
+    border-color: #4CAF50;
+    color: #2E7D32;
+}
+QPushButton#btn_primary:hover {
+    background: #C8E6C9;
+    border-color: #2E7D32;
+}
+
+/* Riêng nút Import - xanh dương nhạt */
+QPushButton#btn_success {
+    background: #E3F2FD;
+    border-color: #2196F3;
+    color: #1565C0;
+}
+QPushButton#btn_success:hover {
+    background: #BBDEFB;
+    border-color: #1565C0;
+}
+
+/* Riêng nút Sửa - cam nhạt */
+QPushButton#btn_warning {
+    background: #FFF3E0;
+    border-color: #FF9800;
+    color: #E65100;
+}
+QPushButton#btn_warning:hover {
+    background: #FFE0B2;
+    border-color: #E65100;
+}
+
+/* Riêng nút Xóa - đỏ nhạt */
+QPushButton#btn_danger {
+    background: #FFEBEE;
+    border-color: #F44336;
+    color: #C62828;
+}
+QPushButton#btn_danger:hover {
+    background: #FFCDD2;
+    border-color: #C62828;
+}
+
+/* Nút mặc định khác - xám nhạt */
+QPushButton#btn_default, QPushButton#btn_info {
+    background: #F5F5F5;
+    border-color: #9E9E9E;
+    color: #424242;
+}
+QPushButton#btn_default:hover, QPushButton#btn_info:hover {
+    background: #EEEEEE;
+    border-color: #616161;
+}
