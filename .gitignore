@@ -25,7 +25,7 @@ frontend/dist/
 .env
 .venv/
 venv/
-
+venv_test/
 # VSCode
 .vscode/
 # Export files
