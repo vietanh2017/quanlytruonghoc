@@ -78,7 +78,7 @@ app.add_middleware(
     allow_origins=[
         "http://localhost:3000",   # React dev server
         "http://localhost:5173",   # Vite dev server
-        # Thêm domain thật khi deploy: "https://truonghoc.com"
+        "https://truonghoc.com"
     ],
     allow_credentials=True,
     allow_methods=["*"],
