@@ -18,8 +18,9 @@ import ThongTinChung from './components/ThongTinChung'
 import { monHocAPI, phanMonAPI, soTietAPI } from '../../api/cauHinh'
 
 const { Title, Text } = Typography
-const api = axios.create({ baseURL: 'http://localhost:8000/api/v1/cau-hinh' })
-const apiGV = axios.create({ baseURL: 'http://localhost:8000/api/v1/giao-vien' })
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+const api = axios.create({ baseURL: API_URL + '/api/v1/cau-hinh' })
+const apiGV = axios.create({ baseURL: API_URL + '/api/v1/giao-vien' })
 
 // ── Hook chung cho mọi tab ────────────────────────────────────
 function useCRUD(endpoint, baseApi = api) {

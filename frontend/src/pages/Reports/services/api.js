@@ -1,7 +1,7 @@
 // frontend/src/pages/Reports/services/api.js
 import axios from 'axios'
-
-const API_BASE = 'http://localhost:8000/api/v1/reports'
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+const API_BASE = API_URL + '/api/v1/reports'
 const api = axios.create({ baseURL: API_BASE })
 
 // ════════════════════════════════════════════════════════════
@@ -21,6 +21,6 @@ export const reportsAPI = {
    * @param {number} params.khoi - Khối lớp
    */
   getReport: (params) => api.get('/report', { params }),
-  
+
   exportExcel: (data) => api.post('/export-excel', data),
 }

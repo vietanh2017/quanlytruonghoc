@@ -18,8 +18,8 @@ import { lopHocApi } from '../../api/lopHoc'
 import axios from 'axios'
 import dayjs from 'dayjs'
 import * as XLSX from 'xlsx'
-
-const apiGV = axios.create({ baseURL: 'http://localhost:8000/api/v1/giao-vien' })
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+const apiGV = axios.create({ baseURL: API_URL + '/api/v1/giao-vien' })
 
 const { Title, Text } = Typography
 const { Dragger } = Upload
@@ -288,7 +288,7 @@ export default function LopHocPage() {
       }, 200)
 
       const response = await axios.post(
-        'http://localhost:8000/api/v1/lop-hoc/import-hoc-sinh',
+        API_URL + '/api/v1/lop-hoc/import-hoc-sinh',
         formData,
         {
           headers: { 'Content-Type': 'multipart/form-data' },

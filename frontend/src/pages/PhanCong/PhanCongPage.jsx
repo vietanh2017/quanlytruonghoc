@@ -12,10 +12,10 @@ import {
 } from '@ant-design/icons'
 import axios from 'axios'
 import * as XLSX from 'xlsx'
-
-const api = axios.create({ baseURL: 'http://localhost:8000/api/v1/phan-cong' })
-const apiPhanMon = axios.create({ baseURL: 'http://localhost:8000/api/v1/phan-cong' })
-const apiCH = axios.create({ baseURL: 'http://localhost:8000/api/v1/cau-hinh' })
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+const api = axios.create({ baseURL: API_URL + '/api/v1/phan-cong' })
+const apiPhanMon = axios.create({ baseURL: API_URL + '/api/v1/phan-cong' })
+const apiCH = axios.create({ baseURL: API_URL + '/api/v1/cau-hinh' })
 const { Title, Text } = Typography
 
 export default function PhanCongPage() {

@@ -1,7 +1,7 @@
 // frontend/src/pages/ThiDuaHS/services/api.js
 import axios from 'axios'
-
-const API_BASE = 'http://localhost:8000/api/v1/thi-dua-hs'
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+const API_BASE = API_URL + '/api/v1/thi-dua-hs'
 export const api = axios.create({ baseURL: API_BASE })
 
 // ===== METADATA =====

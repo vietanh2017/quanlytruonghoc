@@ -16,8 +16,8 @@ import axios from 'axios'
 import { giaoVienApi } from '../../api/giaoVien'
 import * as XLSX from 'xlsx'
 import dayjs from 'dayjs'
-
-const apiCauHinh = axios.create({ baseURL: 'http://localhost:8000/api/v1/cau-hinh' })
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+const apiCauHinh = axios.create({ baseURL: API_URL + '/api/v1/cau-hinh' })
 
 const { Title, Text } = Typography
 const { Dragger } = Upload

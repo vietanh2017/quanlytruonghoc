@@ -60,7 +60,7 @@ const MonHocTab = () => {
 
   const fetchToList = async () => {
     try {
-      const response = await axios.get('http://localhost:8000/api/v1/cau-hinh/to-chuyen-mon');
+      const response = await axios.get(API_URL + '/api/v1/cau-hinh/to-chuyen-mon');
       setToList(response.data || []);
     } catch (error) {
       console.error('Lỗi tải tổ chuyên môn:', error);

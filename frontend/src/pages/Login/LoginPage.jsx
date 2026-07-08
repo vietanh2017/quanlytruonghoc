@@ -6,7 +6,7 @@ import { useNavigate } from 'react-router-dom'
 import axios from 'axios'
 
 const { Title, Text } = Typography
-const API_URL = 'http://localhost:8000/api/v1'
+const API_URL = `${import.meta.env.VITE_API_URL}/api/v1`
 
 export default function LoginPage() {
   const [loading, setLoading] = useState(false)
@@ -19,7 +19,7 @@ export default function LoginPage() {
         email: values.email,
         mat_khau: values.password
       })
-      
+
       // Lưu token và thông tin user
       localStorage.setItem('token', response.data.access_token)
       localStorage.setItem('user', JSON.stringify({
@@ -27,7 +27,7 @@ export default function LoginPage() {
         email: response.data.email,
         role: response.data.role
       }))
-      
+
       message.success(`Chào mừng ${response.data.ho_ten}!`)
       navigate('/')
     } catch (error) {
@@ -45,7 +45,7 @@ export default function LoginPage() {
             <Title level={3}>🏫 Hệ thống quản lý</Title>
             <Text type="secondary">Đăng nhập để tiếp tục</Text>
           </div>
-          
+
           <Form
             name="login"
             onFinish={onFinish}
@@ -61,21 +61,21 @@ export default function LoginPage() {
             >
               <Input prefix={<UserOutlined />} placeholder="Email" />
             </Form.Item>
-            
+
             <Form.Item
               name="password"
               rules={[{ required: true, message: 'Vui lòng nhập mật khẩu' }]}
             >
               <Input.Password prefix={<LockOutlined />} placeholder="Mật khẩu" />
             </Form.Item>
-            
+
             <Form.Item>
               <Button type="primary" htmlType="submit" loading={loading} block>
                 Đăng nhập
               </Button>
             </Form.Item>
           </Form>
-          
+
           <div style={{ textAlign: 'center', marginTop: 16 }}>
             <Text type="secondary" style={{ fontSize: 12 }}>
               Tài khoản mặc định: admin@school.com / eduschool@123

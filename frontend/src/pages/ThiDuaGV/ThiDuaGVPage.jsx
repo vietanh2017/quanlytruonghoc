@@ -9,8 +9,8 @@ import {
   PlusOutlined, DeleteOutlined, EditOutlined, SaveOutlined, CopyOutlined,
 } from '@ant-design/icons'
 import axios from 'axios'
-
-const api = axios.create({ baseURL: 'http://localhost:8000/api/v1/thi-dua-gv' })
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+const api = axios.create({ baseURL: API_URL + '/api/v1/thi-dua-gv' })
 const { Title, Text } = Typography
 
 const THANG_NAM_HOC = [8, 9, 10, 11, 12, 1, 2, 3, 4, 5]

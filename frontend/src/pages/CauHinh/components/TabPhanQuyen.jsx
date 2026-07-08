@@ -8,36 +8,36 @@ import {
 } from 'antd'
 import { SaveOutlined, ReloadOutlined } from '@ant-design/icons'
 import axios from 'axios'
-
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
 const { Title, Text } = Typography
-const api = axios.create({ baseURL: 'http://localhost:8000/api/v1/cau-hinh' })
+const api = axios.create({ baseURL: API_URL + '/api/v1/cau-hinh' })
 
 // ── Cấu hình vai trò ─────────────────────────────────────────
 const ROLES = [
-  { value: 'ADMIN',          label: 'Admin',          color: 'red'    },
-  { value: 'TO_TRUONG',      label: 'Tổ trưởng',      color: 'orange' },
-  { value: 'PHO_TO_TRUONG',  label: 'Phó tổ trưởng',  color: 'gold'   },
+  { value: 'ADMIN', label: 'Admin', color: 'red' },
+  { value: 'TO_TRUONG', label: 'Tổ trưởng', color: 'orange' },
+  { value: 'PHO_TO_TRUONG', label: 'Phó tổ trưởng', color: 'gold' },
   { value: 'TONG_PHU_TRACH', label: 'Tổng phụ trách', color: 'purple' },
-  { value: 'GIAO_VIEN',      label: 'Giáo viên',      color: 'blue'   },
-  { value: 'NHAN_VIEN',      label: 'Nhân viên',      color: 'cyan'   },
+  { value: 'GIAO_VIEN', label: 'Giáo viên', color: 'blue' },
+  { value: 'NHAN_VIEN', label: 'Nhân viên', color: 'cyan' },
 ]
 
 // Tên hiển thị đẹp hơn cho từng module
 const MODULE_LABELS = {
   thi_dua_giao_vien: '🏆 Thi đua giáo viên',
-  thi_dua_hoc_sinh:  '🎓 Thi đua học sinh',
-  thoi_khoa_bieu:    '📅 Thời khóa biểu',
-  phan_cong:         '📋 Phân công',
-  bao_cao:           '📊 Báo cáo',
+  thi_dua_hoc_sinh: '🎓 Thi đua học sinh',
+  thoi_khoa_bieu: '📅 Thời khóa biểu',
+  phan_cong: '📋 Phân công',
+  bao_cao: '📊 Báo cáo',
 }
 
 export default function TabPhanQuyen() {
-  const [selectedRole, setSelectedRole]   = useState(null)
-  const [allQuyen, setAllQuyen]           = useState([])   // toàn bộ quyền
-  const [checkedIds, setCheckedIds]       = useState([])   // quyền đang tick
-  const [originalIds, setOriginalIds]     = useState([])   // để detect thay đổi
-  const [loadingQuyen, setLoadingQuyen]   = useState(false)
-  const [saving, setSaving]               = useState(false)
+  const [selectedRole, setSelectedRole] = useState(null)
+  const [allQuyen, setAllQuyen] = useState([])   // toàn bộ quyền
+  const [checkedIds, setCheckedIds] = useState([])   // quyền đang tick
+  const [originalIds, setOriginalIds] = useState([])   // để detect thay đổi
+  const [loadingQuyen, setLoadingQuyen] = useState(false)
+  const [saving, setSaving] = useState(false)
 
   // Load toàn bộ danh sách quyền 1 lần
   useEffect(() => {
@@ -111,7 +111,7 @@ export default function TabPhanQuyen() {
   }, {})
 
   const hasChanged = JSON.stringify([...checkedIds].sort()) !==
-                     JSON.stringify([...originalIds].sort())
+    JSON.stringify([...originalIds].sort())
 
   const roleCfg = ROLES.find(r => r.value === selectedRole)
 
@@ -189,7 +189,7 @@ export default function TabPhanQuyen() {
           {/* Từng module */}
           <Row gutter={[16, 16]}>
             {Object.entries(grouped).map(([mod, quyens]) => {
-              const moduleIds  = quyens.map(q => q.id)
+              const moduleIds = quyens.map(q => q.id)
               const checkedCnt = moduleIds.filter(id => checkedIds.includes(id)).length
               const allChecked = checkedCnt === moduleIds.length
               const partChecked = checkedCnt > 0 && !allChecked

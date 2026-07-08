@@ -30,8 +30,8 @@ export default function Dashboard() {
     try {
       // ⭐ Gọi API lấy danh sách lớp (có sĩ số)
       const [gvRes, lopRes] = await Promise.all([
-        axios.get('http://localhost:8000/api/v1/giao-vien/?include_inactive=true'),
-        axios.get('http://localhost:8000/api/v1/lop-hoc/?include_inactive=true'),
+        axios.get(API_URL + '/api/v1/giao-vien/?include_inactive=true'),
+        axios.get(API_URL + '/api/v1/lop-hoc/?include_inactive=true'),
       ])
 
       const tongGV = gvRes.data?.total || gvRes.data?.items?.length || 0
@@ -58,7 +58,7 @@ export default function Dashboard() {
   // ⭐ HÀM LẤY HOẠT ĐỘNG GẦN ĐÂY
   const loadRecentActivities = async () => {
     try {
-      const res = await axios.get('http://localhost:8000/api/v1/dashboard/recent-activities')
+      const res = await axios.get(API_URL + '/api/v1/dashboard/recent-activities')
       setRecentActivities(res.data || [])
     } catch (error) {
       console.error('Lỗi load hoạt động:', error)
