@@ -10,8 +10,11 @@ from modules.cau_hinh.repository import (
     NamHocRepository, ToChuyenMonRepository,
     MonHocRepository, NguoiDungRepository,
     HocKyRepository, TietHocRepository,
+    PhanMonRepository, MonHocKhoiRepository,
+    # ⭐ THÊM IMPORT
+    ThongTinTruongRepository, CauHinhChungRepository,
+    ThongTinTruong, CauHinhChung
 )
-from modules.cau_hinh.repository import PhanMonRepository, MonHocKhoiRepository
 from shared.dto.result import ServiceResult
 from shared.enums import Role
 from core.auth.password import hash_password
@@ -25,11 +28,14 @@ class CauHinhService:
         self.nam_hoc_repo       = NamHocRepository(session)
         self.to_chuyen_mon_repo = ToChuyenMonRepository(session)
         self.mon_hoc_repo       = MonHocRepository(session)
-        self.phan_mon_repo = PhanMonRepository(session)
-        self.mon_hoc_khoi_repo = MonHocKhoiRepository(session)
+        self.phan_mon_repo      = PhanMonRepository(session)
+        self.mon_hoc_khoi_repo  = MonHocKhoiRepository(session)
         self.nguoi_dung_repo    = NguoiDungRepository(session)
         self.hoc_ky_repo        = HocKyRepository(session)
         self.tiet_hoc_repo      = TietHocRepository(session)
+        # ⭐ THÊM REPOSITORY MỚI
+        self.thong_tin_truong_repo = ThongTinTruongRepository(session)
+        self.cau_hinh_chung_repo   = CauHinhChungRepository(session)
 
     def _commit(self):
         self.session.commit()
@@ -179,12 +185,10 @@ class CauHinhService:
             return ServiceResult(ok=False, error=str(e))
 
     # ══ MÔN HỌC ══════════════════════════════════════════════
-    # Model MonHoc thực tế: co_phan_mon, to_id, thu_tu
 
     def lay_ds_mon_hoc(self) -> ServiceResult:
         try:
             data = self.mon_hoc_repo.get_all()
-            # ⭐ Chuyển đổi dữ liệu để bao gồm phân môn và số tiết
             result = []
             for mon in data:
                 mon_dict = {
@@ -221,6 +225,7 @@ class CauHinhService:
             return ServiceResult(ok=True, data=result)
         except Exception as e:
             return ServiceResult(ok=False, error=str(e))
+
     def them_mon_hoc(self, ma_mon: str, ten_mon: str,
                      co_phan_mon: bool = False,
                      to_id: Optional[int] = None,
@@ -264,6 +269,7 @@ class CauHinhService:
         except Exception as e:
             self._rollback()
             return ServiceResult(ok=False, error=str(e))
+
     # ══ PHÂN MÔN ══════════════════════════════════════════════
 
     def lay_ds_phan_mon(self) -> ServiceResult:
@@ -483,6 +489,125 @@ class CauHinhService:
             self.tiet_hoc_repo.delete(id)
             self._commit()
             return ServiceResult(ok=True, error="Xóa tiết học thành công.")
+        except Exception as e:
+            self._rollback()
+            return ServiceResult(ok=False, error=str(e))
+
+
+    # ═══════════════════════════════════════════════════════════════
+    # ⭐ THÊM PHƯƠNG THỨC CHO THÔNG TIN TRƯỜNG
+    # ═══════════════════════════════════════════════════════════════
+
+    def lay_thong_tin_truong(self) -> ServiceResult:
+        """Lấy thông tin trường (chỉ có 1 bản ghi)"""
+        try:
+            info = self.thong_tin_truong_repo.get_or_create()
+            self._commit()
+            
+            # Lấy tên năm học, học kỳ
+            ten_nam_hoc = ""
+            ten_hoc_ky = ""
+            
+            if info.nam_hoc_id:
+                from core.db.models.nam_hoc import NamHoc
+                nam_hoc = self.session.query(NamHoc).filter(NamHoc.id == info.nam_hoc_id).first()
+                ten_nam_hoc = nam_hoc.ten_nam_hoc if nam_hoc else ""
+            
+            if info.hoc_ky_id:
+                from core.db.models.hoc_ky import HocKy
+                hoc_ky = self.session.query(HocKy).filter(HocKy.id == info.hoc_ky_id).first()
+                ten_hoc_ky = hoc_ky.ten_hoc_ky if hoc_ky else ""
+            
+            return ServiceResult(ok=True, data={
+                "id": info.id,
+                "ten_truong": info.ten_truong,
+                "ten_truong_tieng_anh": info.ten_truong_tieng_anh or "",
+                "dia_chi": info.dia_chi or "",
+                "dien_thoai": info.dien_thoai or "",
+                "email": info.email or "",
+                "website": info.website or "",
+                "ma_so_truong": info.ma_so_truong or "",
+                "logo": info.logo or "",
+                "nam_hoc_id": info.nam_hoc_id,
+                "hoc_ky_id": info.hoc_ky_id,
+                "ten_nam_hoc": ten_nam_hoc,
+                "ten_hoc_ky": ten_hoc_ky,
+                "ngay_bat_dau": info.ngay_bat_dau,
+                "ngay_ket_thuc": info.ngay_ket_thuc,
+                "hieu_truong": info.hieu_truong or "",
+                "hieu_pho": info.hieu_pho or "",
+                "to_truong_cm": info.to_truong_cm or "",
+                "nguoi_lap": info.nguoi_lap or "",
+                "is_active": info.is_active,
+                "created_at": info.created_at,
+                "updated_at": info.updated_at,
+            })
+        except Exception as e:
+            return ServiceResult(ok=False, error=str(e))
+
+    def luu_thong_tin_truong(self, data: dict) -> ServiceResult:
+        """Lưu thông tin trường"""
+        try:
+            info = self.thong_tin_truong_repo.get_or_create()
+            
+            fields = [
+                'ten_truong', 'ten_truong_tieng_anh', 'dia_chi', 
+                'dien_thoai', 'email', 'website', 'ma_so_truong',
+                'logo', 'nam_hoc_id', 'hoc_ky_id', 'ngay_bat_dau', 
+                'ngay_ket_thuc', 'hieu_truong', 'hieu_pho', 
+                'to_truong_cm', 'nguoi_lap', 'is_active'
+            ]
+            
+            for field in fields:
+                if field in data and data[field] is not None:
+                    setattr(info, field, data[field])
+            
+            self._commit()
+            return ServiceResult(ok=True, error="Lưu thông tin thành công.")
+        except Exception as e:
+            self._rollback()
+            return ServiceResult(ok=False, error=str(e))
+
+
+    # ═══════════════════════════════════════════════════════════════
+    # ⭐ THÊM PHƯƠNG THỨC CHO CẤU HÌNH CHUNG (KEY-VALUE)
+    # ═══════════════════════════════════════════════════════════════
+
+    def lay_cau_hinh(self, key: str) -> ServiceResult:
+        """Lấy giá trị cấu hình theo key"""
+        try:
+            value = self.cau_hinh_chung_repo.get_value(key)
+            return ServiceResult(ok=True, data=value)
+        except Exception as e:
+            return ServiceResult(ok=False, error=str(e))
+
+    def lay_tat_ca_cau_hinh(self) -> ServiceResult:
+        """Lấy tất cả cấu hình"""
+        try:
+            data = self.session.query(CauHinhChung).all()
+            result = {item.key: item.value for item in data}
+            return ServiceResult(ok=True, data=result)
+        except Exception as e:
+            return ServiceResult(ok=False, error=str(e))
+
+    def luu_cau_hinh(self, key: str, value: str, ghi_chu: str = "") -> ServiceResult:
+        """Lưu cấu hình key-value"""
+        try:
+            obj = self.cau_hinh_chung_repo.set_value(key, value, ghi_chu)
+            self._commit()
+            return ServiceResult(ok=True, data=obj, error="Lưu cấu hình thành công.")
+        except Exception as e:
+            self._rollback()
+            return ServiceResult(ok=False, error=str(e))
+
+    def xoa_cau_hinh(self, key: str) -> ServiceResult:
+        """Xóa cấu hình theo key"""
+        try:
+            result = self.cau_hinh_chung_repo.delete(key)
+            self._commit()
+            if result:
+                return ServiceResult(ok=True, error="Xóa cấu hình thành công.")
+            return ServiceResult(ok=False, error="Không tìm thấy key.")
         except Exception as e:
             self._rollback()
             return ServiceResult(ok=False, error=str(e))

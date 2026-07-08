@@ -1,14 +1,27 @@
 # core/db/session.py
+import os
 from typing import Generator
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, Session
 
-# Dùng SQLite để test nhanh, đổi sang PostgreSQL sau
-DATABASE_URL = "sqlite:///./truonghoc.db"
+# ── Đọc DATABASE_URL từ biến môi trường ────────────────────────
+# Local dev: không set gì cả -> tự dùng SQLite (mặc định cũ)
+# Production (Render/Railway...): set DATABASE_URL trỏ tới PostgreSQL
+DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///./truonghoc.db")
+
+# Render/Railway đôi khi cấp URL dạng "postgres://..." (cũ),
+# nhưng SQLAlchemy 1.4+ yêu cầu "postgresql://..." -> tự sửa cho chắc
+if DATABASE_URL.startswith("postgres://"):
+    DATABASE_URL = DATABASE_URL.replace("postgres://", "postgresql://", 1)
+
+# connect_args chỉ cần thiết riêng cho SQLite (single-thread check)
+connect_args = {"check_same_thread": False} if DATABASE_URL.startswith("sqlite") else {}
 
 engine = create_engine(
     DATABASE_URL,
-    connect_args={"check_same_thread": False}  # Cần thiết cho SQLite
+    connect_args=connect_args,
+    pool_pre_ping=True,  # tự kiểm tra connection còn sống trước khi dùng
+                         # (quan trọng với Postgres free tier hay bị ngủ/ngắt kết nối)
 )
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 

@@ -9,6 +9,8 @@ from modules.cau_hinh.views.nguoi_dung_tab import NguoiDungTab
 from modules.cau_hinh.views.phan_quyen_tab import PhanQuyenTab
 from modules.cau_hinh.views.hoc_ky_tab import HocKyTab
 from modules.cau_hinh.views.tiet_hoc_tab import TietHocTab
+# ⭐ THÊM IMPORT
+from modules.cau_hinh.views.thong_tin_chung_tab import ThongTinChungTab
 
 
 class CauHinhPage(QWidget):
@@ -55,7 +57,11 @@ class CauHinhPage(QWidget):
             }
         """)
         
-        # Thêm các tab với icon
+        # ⭐ THÊM TAB THÔNG TIN CHUNG (VỊ TRÍ ĐẦU TIÊN)
+        self.thong_tin_chung_tab = ThongTinChungTab(self.session)
+        self.tab_widget.addTab(self.thong_tin_chung_tab, "🏫  Thông tin chung")
+        
+        # Các tab hiện có
         self.nam_hoc_tab = NamHocTab(self.session)
         self.tab_widget.addTab(self.nam_hoc_tab, "📅  Năm học")
         
@@ -77,13 +83,15 @@ class CauHinhPage(QWidget):
         self.phan_quyen_tab = PhanQuyenTab(self.session)
         self.tab_widget.addTab(self.phan_quyen_tab, "🔐  Phân quyền")
         
-        # Màu sắc cho từng tab (tùy chọn)
-        self.tab_widget.tabBar().setTabTextColor(0, QColor(29, 158, 117))   # Năm học
-        self.tab_widget.tabBar().setTabTextColor(1, QColor(33, 150, 243))   # Học kỳ
-        self.tab_widget.tabBar().setTabTextColor(2, QColor(255, 152, 0))    # Tổ CM
-        self.tab_widget.tabBar().setTabTextColor(3, QColor(156, 39, 176))   # Môn học
-        self.tab_widget.tabBar().setTabTextColor(4, QColor(0, 188, 212))    # Tài khoản
-        self.tab_widget.tabBar().setTabTextColor(5, QColor(244, 67, 54))    # Phân quyền
+        # ⭐ Cập nhật màu sắc cho các tab
+        self.tab_widget.tabBar().setTabTextColor(0, QColor(13, 71, 161))     # Thông tin chung (Xanh đậm)
+        self.tab_widget.tabBar().setTabTextColor(1, QColor(29, 158, 117))   # Năm học
+        self.tab_widget.tabBar().setTabTextColor(2, QColor(33, 150, 243))   # Học kỳ
+        self.tab_widget.tabBar().setTabTextColor(3, QColor(255, 152, 0))    # Tổ CM
+        self.tab_widget.tabBar().setTabTextColor(4, QColor(156, 39, 176))   # Môn học
+        self.tab_widget.tabBar().setTabTextColor(5, QColor(0, 188, 212))    # Tiết học
+        self.tab_widget.tabBar().setTabTextColor(6, QColor(244, 67, 54))    # Tài khoản
+        self.tab_widget.tabBar().setTabTextColor(7, QColor(96, 125, 139))   # Phân quyền
         
         layout.addWidget(self.tab_widget)
     

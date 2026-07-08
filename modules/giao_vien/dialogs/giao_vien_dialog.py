@@ -17,6 +17,25 @@ ROLE_LABELS = {
     Role.NHAN_VIEN:      "Nhân viên", 
 }
 
+# ⭐ DANH SÁCH KIÊM NHIỆM CỐ ĐỊNH
+KIEM_NHIEM_LIST = [
+    "-- Không có --",
+    "Tổ trưởng chuyên môn",
+    "Tổ phó chuyên môn",
+    "Bí thư Đoàn",
+    "Phó Bí thư Đoàn",
+    "Tổng phụ trách Đội",
+    "Chủ tịch Công đoàn",
+    "Phó Chủ tịch Công đoàn",
+    "Thủ quỹ",
+    "Văn thư",
+    "Thư viện",
+    "Thiết bị - Thí nghiệm",
+    "Công tác Đội",
+    "Y tế học đường",
+    "Khác",
+]
+
 BTN_PRIMARY = """
     QPushButton {
         background: #1D9E75; color: white;
@@ -99,6 +118,12 @@ class GiaoVienDialog(QDialog):
         self.inp_monday = inp("Toán, Lý...")
         self.inp_sdt    = inp("0901234567")
 
+        # ⭐ COMBOBOX KIÊM NHIỆM
+        self.cmb_kiem_nhiem = QComboBox()
+        self.cmb_kiem_nhiem.setStyleSheet(cmb_style)
+        for item in KIEM_NHIEM_LIST:
+            self.cmb_kiem_nhiem.addItem(item)
+
         # Tổ chuyên môn
         self.cmb_to = QComboBox()
         self.cmb_to.setStyleSheet(cmb_style)
@@ -122,6 +147,7 @@ class GiaoVienDialog(QDialog):
         form.addRow(self._lbl("Mã GV *",     lbl_s), self.inp_magv)
         form.addRow(self._lbl("Môn dạy",     lbl_s), self.inp_monday)
         form.addRow(self._lbl("SĐT",         lbl_s), self.inp_sdt)
+        form.addRow(self._lbl("Kiêm nhiệm",  lbl_s), self.cmb_kiem_nhiem)  # ⭐ THAY BẰNG COMBOBOX
         form.addRow(self._lbl("Tổ CM",       lbl_s), self.cmb_to)
         form.addRow(self._lbl("Vai trò",     lbl_s), self.cmb_role)
         form.addRow(self._lbl("Trạng thái",  lbl_s), self.chk_active)
@@ -159,6 +185,17 @@ class GiaoVienDialog(QDialog):
         self.inp_magv.setText(gv.ma_giao_vien)
         self.inp_monday.setText(gv.mon_day or "")
         self.inp_sdt.setText(gv.so_dien_thoai or "")
+        
+        # ⭐ FILL KIÊM NHIỆM
+        kiem_nhiem = gv.kiem_nhiem or "-- Không có --"
+        idx = self.cmb_kiem_nhiem.findText(kiem_nhiem)
+        if idx >= 0:
+            self.cmb_kiem_nhiem.setCurrentIndex(idx)
+        else:
+            # Nếu giá trị không có trong danh sách, thêm vào
+            self.cmb_kiem_nhiem.addItem(kiem_nhiem)
+            self.cmb_kiem_nhiem.setCurrentIndex(self.cmb_kiem_nhiem.count() - 1)
+        
         self.chk_active.setChecked(gv.active)
         
         for i in range(self.cmb_to.count()):
@@ -186,13 +223,18 @@ class GiaoVienDialog(QDialog):
         self.accept()
 
     def get_data(self):
+        kiem_nhiem = self.cmb_kiem_nhiem.currentText()
+        if kiem_nhiem == "-- Không có --":
+            kiem_nhiem = ""
+            
         data = {
             "ma_gv": self.inp_magv.text().strip(),
             "ho_ten": self.inp_hoten.text().strip(),
             "email": self.inp_email.text().strip(),
             "mon_day": self.inp_monday.text().strip(),
-            "to_id": self.cmb_to.currentData(),
             "so_dien_thoai": self.inp_sdt.text().strip(),
+            "kiem_nhiem": kiem_nhiem,  # ⭐ LẤY TỪ COMBOBOX
+            "to_id": self.cmb_to.currentData(),
             "active": self.chk_active.isChecked(),
             "role": self.cmb_role.currentData()
         }

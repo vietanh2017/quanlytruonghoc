@@ -13,7 +13,7 @@ from core.db.models.giao_vien import GiaoVien
 from core.db.models.lop_hoc import LopHoc
 from core.db.models.hoc_sinh import HocSinh
 from core.db.models.hoc_ky import HocKy
-
+from core.db.models.thang_thi_dua import ThangThiDua
 __all__ = ['QuyenModel', 'VaiTroQuyenModel']
 __all__ = [
     "NguoiDung",

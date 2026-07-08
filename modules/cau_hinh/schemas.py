@@ -1,6 +1,7 @@
 # modules/cau_hinh/schemas.py
 from typing import Optional
 from pydantic import BaseModel, field_validator
+from datetime import date, datetime
 
 
 # ── Năm học ───────────────────────────────────────────────────
@@ -218,4 +219,119 @@ class TietHocResponse(BaseModel):
     thoi_gian_bat_dau: Optional[str] = ""
     thoi_gian_ket_thuc: Optional[str] = ""
     active: int
+    model_config = {"from_attributes": True}
+
+
+# ═══════════════════════════════════════════════════════════════
+# ⭐ THÊM SCHEMAS CHO THÔNG TIN TRƯỜNG
+# ═══════════════════════════════════════════════════════════════
+
+class ThongTinTruongCreate(BaseModel):
+    ten_truong: str
+    ten_truong_tieng_anh: Optional[str] = ""
+    dia_chi: Optional[str] = ""
+    dien_thoai: Optional[str] = ""
+    email: Optional[str] = ""
+    website: Optional[str] = ""
+    ma_so_truong: Optional[str] = ""
+    logo: Optional[str] = ""
+    
+    nam_hoc_id: Optional[int] = None
+    hoc_ky_id: Optional[int] = None
+    ngay_bat_dau: Optional[date] = None
+    ngay_ket_thuc: Optional[date] = None
+    
+    hieu_truong: Optional[str] = ""
+    hieu_pho: Optional[str] = ""
+    to_truong_cm: Optional[str] = ""
+    nguoi_lap: Optional[str] = ""
+    is_active: Optional[bool] = True
+
+    @field_validator("ten_truong")
+    @classmethod
+    def not_empty(cls, v: str) -> str:
+        if not v.strip():
+            raise ValueError("Tên trường không được để trống.")
+        return v.strip()
+
+
+class ThongTinTruongUpdate(BaseModel):
+    ten_truong: Optional[str] = None
+    ten_truong_tieng_anh: Optional[str] = None
+    dia_chi: Optional[str] = None
+    dien_thoai: Optional[str] = None
+    email: Optional[str] = None
+    website: Optional[str] = None
+    ma_so_truong: Optional[str] = None
+    logo: Optional[str] = None
+    
+    nam_hoc_id: Optional[int] = None
+    hoc_ky_id: Optional[int] = None
+    ngay_bat_dau: Optional[date] = None
+    ngay_ket_thuc: Optional[date] = None
+    
+    hieu_truong: Optional[str] = None
+    hieu_pho: Optional[str] = None
+    to_truong_cm: Optional[str] = None
+    nguoi_lap: Optional[str] = None
+    is_active: Optional[bool] = None
+
+
+class ThongTinTruongResponse(BaseModel):
+    id: int
+    ten_truong: str
+    ten_truong_tieng_anh: Optional[str] = ""
+    dia_chi: Optional[str] = ""
+    dien_thoai: Optional[str] = ""
+    email: Optional[str] = ""
+    website: Optional[str] = ""
+    ma_so_truong: Optional[str] = ""
+    logo: Optional[str] = ""
+    
+    nam_hoc_id: Optional[int] = None
+    hoc_ky_id: Optional[int] = None
+    ten_nam_hoc: Optional[str] = ""
+    ten_hoc_ky: Optional[str] = ""
+    ngay_bat_dau: Optional[date] = None
+    ngay_ket_thuc: Optional[date] = None
+    
+    hieu_truong: Optional[str] = ""
+    hieu_pho: Optional[str] = ""
+    to_truong_cm: Optional[str] = ""
+    nguoi_lap: Optional[str] = ""
+    is_active: bool
+    created_at: Optional[datetime] = None
+    updated_at: Optional[datetime] = None
+    
+    model_config = {"from_attributes": True}
+
+
+# ── Cấu hình chung (Key-Value) ──────────────────────────────
+
+class CauHinhChungCreate(BaseModel):
+    key: str
+    value: str
+    ghi_chu: Optional[str] = ""
+
+    @field_validator("key")
+    @classmethod
+    def key_not_empty(cls, v: str) -> str:
+        if not v.strip():
+            raise ValueError("Key không được để trống.")
+        return v.strip()
+
+
+class CauHinhChungUpdate(BaseModel):
+    value: Optional[str] = None
+    ghi_chu: Optional[str] = None
+
+
+class CauHinhChungResponse(BaseModel):
+    id: int
+    key: str
+    value: Optional[str] = ""
+    ghi_chu: Optional[str] = ""
+    created_at: Optional[datetime] = None
+    updated_at: Optional[datetime] = None
+    
     model_config = {"from_attributes": True}

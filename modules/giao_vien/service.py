@@ -20,7 +20,7 @@ from shared.dto.result import ServiceResult
 from shared.enums import Role
 # KHÔNG cần import NguoiDung vì đã có trong repository
 # KHÔNG cần import GiaoVien vì đã có trong repository
-
+from modules.cau_hinh.kiem_nhiem_config import get_so_tiet_giam
 
 class GiaoVienService:
     def __init__(self, session: Session):
@@ -78,6 +78,7 @@ class GiaoVienService:
         to_id: Optional[int] = None,
         so_dien_thoai: str = "",
         role: Role = Role.GIAO_VIEN,
+        kiem_nhiem: str = "",  # ⭐ THÊM
         active: bool = True,
     ) -> ServiceResult:
         # Validation
@@ -111,6 +112,7 @@ class GiaoVienService:
                 mon_day=str(mon_day or '').strip(),
                 to_id=to_id,
                 so_dien_thoai=str(so_dien_thoai or '').strip(),
+                kiem_nhiem=str(kiem_nhiem or '').strip(),  # ⭐ THÊM
                 active=active,
             )
             self._commit()
@@ -131,8 +133,10 @@ class GiaoVienService:
         mon_day: Optional[str] = None,
         to_id: Optional[int] = None,
         so_dien_thoai: Optional[str] = None,
+        kiem_nhiem: Optional[str] = None,
         active: Optional[bool] = None,
         role: Optional[Role] = None,
+        
     ) -> ServiceResult:
         try:
             gv = self.repo.get_by_id(gv_id)
@@ -152,6 +156,8 @@ class GiaoVienService:
                 gv.to_id = to_id
             if so_dien_thoai is not None:
                 gv.so_dien_thoai = str(so_dien_thoai).strip()
+            if kiem_nhiem is not None:
+                gv.kiem_nhiem = str(kiem_nhiem).strip()   # ✅ thêm dòng này
             if active is not None:
                 gv.active = active
 
@@ -406,3 +412,32 @@ class GiaoVienService:
         except (TypeError, ValueError):
             pass
         return value
+    def tinh_tong_tiet(self, gv_id: int) -> int:
+        """Tính tổng số tiết của giáo viên (sau khi trừ kiêm nhiệm)"""
+        try:
+            from core.db.models.phan_cong import PhanCongGiangDay
+            from core.db.models.mon_hoc import MonHocKhoi
+            
+            # 1. Tính tổng tiết từ phân công
+            phan_congs = self.session.query(PhanCongGiangDay).filter(
+                PhanCongGiangDay.giao_vien_id == gv_id
+            ).all()
+            
+            tong_tiet = 0
+            for pc in phan_congs:
+                mk = self.session.query(MonHocKhoi).filter(
+                    MonHocKhoi.mon_hoc_id == pc.mon_hoc_id,
+                    MonHocKhoi.khoi == pc.lop_hoc.khoi
+                ).first()
+                if mk:
+                    tong_tiet += mk.so_tiet
+            
+            # 2. Trừ tiết kiêm nhiệm
+            gv = self.repo.get_by_id(gv_id)
+            if gv and gv.kiem_nhiem:
+                so_tiet_giam = get_so_tiet_giam(gv.kiem_nhiem)
+                tong_tiet = max(tong_tiet - so_tiet_giam, 0)
+            
+            return tong_tiet
+        except Exception as e:
+            return 0

@@ -342,7 +342,7 @@ function TabChamDiem({ meta }) {
           <Row align="middle" gutter={16}>
             <Col>
               <Text strong>📊 ĐIỂM HIỆN TẠI:</Text>
-              <Text strong style={{ fontSize: 20, color: '#1D9E75', marginLeft: 8 }}>
+              <Text strong style={{ fontSize: 18, color: '#1D9E75', marginLeft: 8 }}>
                 [{diemHienTai.toFixed(1)}]
               </Text>
             </Col>
@@ -389,7 +389,7 @@ function BangXepHang({ data, loading, tieuDe }) {
   const cols = [
     {
       title: 'Hạng', dataIndex: 'hang', width: 70, align: 'center',
-      render: v => <Text strong style={{ fontSize: 16 }}>{HANG_LABEL(v)}</Text>
+      render: v => <Text strong style={{ fontSize: 12 }}>{HANG_LABEL(v)}</Text>
     },
     { title: 'Mã GV', dataIndex: 'ma_giao_vien', width: 90, align: 'center' },
     { title: 'Họ tên', dataIndex: 'ho_ten' },
@@ -619,7 +619,7 @@ export default function ThiDuaGVPage() {
 
   return (
     <div>
-      <Title level={4} style={{ marginBottom: 16 }}>🏆 Thi Đua Giáo Viên</Title>
+      <Title level={4} style={{ marginBottom: 12, fontSize: 16 }}>🏆 Thi Đua Giáo Viên</Title>
       <Tabs items={tabs} type="card" />
       <style>{`
         .row-gold  td { background: #FFFDE7 !important; }

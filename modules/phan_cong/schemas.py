@@ -83,4 +83,10 @@ class PhanCongTongHopItem(BaseModel):
     giao_vien_id: int
     ho_ten: str
     phan_cong: list[dict]
+    # ⭐ Thêm các field breakdown tiết dạy / tiết chủ nhiệm
+    # (nếu thiếu các field này, response_model của FastAPI sẽ tự lọc bỏ
+    #  mọi field không khai báo ở đây, dù service đã trả về đủ)
+    tiet_day: int = 0
+    lop_chu_nhiem: list[str] = []
+    tiet_cn: int = 0
     tong_tiet: int

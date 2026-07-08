@@ -17,6 +17,11 @@ from core.db.models.mon_hoc import MonHoc, PhanMon, MonHocKhoi  # ⭐ Đã sửa
 from core.db.models.lop_hoc import LopHoc
 
 
+# ⭐ Số tiết chủ nhiệm theo quy định (Thông tư 28): 1 lớp chủ nhiệm = 4 tiết/tuần
+# (Đồng bộ với TKBExportService.SO_TIET_CN ở modules/tkb/export_service.py)
+SO_TIET_CN = 4
+
+
 class PhanCongService:
     def __init__(self, session: Session):
         self.session = session
@@ -116,16 +121,36 @@ class PhanCongService:
                     print(f"⚠️ Lỗi xử lý phân công ID={pc.id}: {e}")
                     continue
 
+            # ⭐ Lấy danh sách lớp mà GV làm chủ nhiệm (từ module Giáo viên/Lớp học)
+            # để cộng thêm tiết chủ nhiệm vào tổng số tiết.
+            gvcn_map = defaultdict(list)  # {gv_id: [ten_lop, ...]}
+            try:
+                ds_lop = self.session.query(LopHoc).filter(
+                    LopHoc.giao_vien_cn_id.isnot(None)
+                ).all()
+                for lop in ds_lop:
+                    gvcn_map[lop.giao_vien_cn_id].append(lop.ten_lop)
+            except Exception as e:
+                print(f"⚠️ Lỗi lấy danh sách GVCN: {e}")
+
             result = []
             for gv_id, data in gv_dict.items():
                 try:
                     gv = self.session.get(GiaoVien, gv_id)
                     ho_ten = gv.nguoi_dung.ho_ten if gv and gv.nguoi_dung else f"GV_{gv_id}"
+
+                    lop_chu_nhiem = gvcn_map.get(gv_id, [])
+                    tiet_day = data["tong_tiet"]
+                    tiet_cn = len(lop_chu_nhiem) * SO_TIET_CN
+
                     result.append({
                         "giao_vien_id": gv_id,
                         "ho_ten": ho_ten,
                         "phan_cong": data["phan_cong"],
-                        "tong_tiet": data["tong_tiet"],
+                        "tiet_day": tiet_day,
+                        "lop_chu_nhiem": lop_chu_nhiem,
+                        "tiet_cn": tiet_cn,
+                        "tong_tiet": tiet_day + tiet_cn,
                     })
                 except Exception as e:
                     print(f"⚠️ Lỗi xử lý giáo viên ID={gv_id}: {e}")
@@ -140,7 +165,7 @@ class PhanCongService:
     # ── Thêm ──────────────────────────────────────────────────
 
     def them(self, giao_vien_id: int, nam_hoc_id: int, hoc_ky_id: int,
-             phan_cong_list: list[dict], clear_old: bool = False) -> ServiceResult:
+            phan_cong_list: list[dict], clear_old: bool = False) -> ServiceResult:
         try:
             if clear_old:
                 self.session.query(PhanCongGiangDay).filter(
@@ -152,12 +177,16 @@ class PhanCongService:
             added = 0
             for pc in phan_cong_list:
                 mon_hoc_id = pc["mon_hoc_id"]
-                
-                # Kiểm tra nếu mon_hoc_id là phân môn
-                phan_mon = self.session.query(PhanMon).filter(PhanMon.id == mon_hoc_id).first()
-                if phan_mon:
-                    mon_hoc_id = phan_mon.mon_hoc_id
-                
+                phan_mon_id = pc.get("phan_mon_id")  # ✅ Lấy phan_mon_id riêng
+
+                # ✅ Chỉ resolve phan_mon nếu phan_mon_id được truyền vào rõ ràng
+                if phan_mon_id:
+                    phan_mon = self.session.query(PhanMon).filter(
+                        PhanMon.id == phan_mon_id
+                    ).first()
+                    if phan_mon:
+                        mon_hoc_id = phan_mon.mon_hoc_id
+
                 exist = self.session.query(PhanCongGiangDay).filter(
                     PhanCongGiangDay.giao_vien_id == giao_vien_id,
                     PhanCongGiangDay.nam_hoc_id == nam_hoc_id,

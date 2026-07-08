@@ -36,7 +36,30 @@ def lay_danh_sach(
     result = service.lay_ds(include_inactive=include_inactive)
     if not result.ok:
         raise HTTPException(status_code=500, detail=result.error)
-    return GiaoVienListResponse(total=len(result.data), items=result.data)
+    
+    # ⭐ Đảm bảo dữ liệu trả về có kiem_nhiem
+    items = []
+    for gv in result.data:
+        items.append({
+            "id": gv.id,
+            "ma_giao_vien": gv.ma_giao_vien,
+            "mon_day": gv.mon_day or "",
+            "so_dien_thoai": gv.so_dien_thoai or "",
+            "kiem_nhiem": gv.kiem_nhiem or "",  # ⭐ THÊM
+            "active": gv.active,
+            "nguoi_dung": {
+                "id": gv.nguoi_dung.id,
+                "ho_ten": gv.nguoi_dung.ho_ten,
+                "email": gv.nguoi_dung.email,
+                "active": gv.nguoi_dung.active,
+            } if gv.nguoi_dung else None,
+            "to_chuyen_mon": {
+                "id": gv.to_chuyen_mon.id,
+                "ten_to": gv.to_chuyen_mon.ten_to,
+            } if gv.to_chuyen_mon else None,
+        })
+    
+    return GiaoVienListResponse(total=len(items), items=items)
 
 
 # ── GET /giao-vien/to/{to_id} ─────────────────────────────────
@@ -62,7 +85,28 @@ def lay_chi_tiet(
     result = service.lay_chi_tiet(gv_id)
     if not result.ok:
         raise HTTPException(status_code=404, detail=result.error)
-    return result.data
+    
+    # ⭐ ĐẢM BẢO TRẢ VỀ kiem_nhiem
+    gv = result.data
+    response_data = {
+        "id": gv.id,
+        "ma_giao_vien": gv.ma_giao_vien,
+        "mon_day": gv.mon_day or "",
+        "so_dien_thoai": gv.so_dien_thoai or "",
+        "kiem_nhiem": gv.kiem_nhiem or "",  # ⭐ THÊM
+        "active": gv.active,
+        "nguoi_dung": {
+            "id": gv.nguoi_dung.id,
+            "ho_ten": gv.nguoi_dung.ho_ten,
+            "email": gv.nguoi_dung.email,
+            "active": gv.nguoi_dung.active,
+        } if gv.nguoi_dung else None,
+        "to_chuyen_mon": {
+            "id": gv.to_chuyen_mon.id,
+            "ten_to": gv.to_chuyen_mon.ten_to,
+        } if gv.to_chuyen_mon else None,
+    }
+    return response_data
 
 
 # ── POST /giao-vien/ ──────────────────────────────────────────
@@ -80,6 +124,7 @@ def them_giao_vien(
         mon_day=body.mon_day or "",
         to_id=body.to_id,
         so_dien_thoai=body.so_dien_thoai or "",
+        kiem_nhiem=body.kiem_nhiem or "",  # ⭐ THÊM DÒNG NÀY
         active=body.active,
     )
     if not result.ok:
@@ -104,6 +149,7 @@ def sua_giao_vien(
         mon_day=body.mon_day,
         to_id=body.to_id,
         so_dien_thoai=body.so_dien_thoai,
+        kiem_nhiem=body.kiem_nhiem,  # ✅ Thêm
         active=body.active,
     )
     if not result.ok:

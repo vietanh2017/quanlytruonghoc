@@ -4,7 +4,7 @@
 from sqlalchemy import Column, Integer, String, Boolean, ForeignKey
 from sqlalchemy.orm import relationship
 from core.db.base import Base
-
+from core.db.models.phan_cong import PhanCongGiangDay
 
 class GiaoVien(Base):
     __tablename__ = "giao_vien"
@@ -16,6 +16,7 @@ class GiaoVien(Base):
     mon_day       = Column(String(100), default="")
     to_id         = Column(Integer, ForeignKey("to_chuyen_mon.id"), nullable=True)
     so_dien_thoai = Column(String(15), default="")
+    kiem_nhiem    = Column(String(200), default="")  # ✅ Thêm dòng này
     active        = Column(Boolean, default=True, nullable=False)
 
     nguoi_dung    = relationship("NguoiDung", back_populates="giao_vien")

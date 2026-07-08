@@ -7,10 +7,13 @@ import {
 } from 'antd'
 import {
   PlusOutlined, EditOutlined, DeleteOutlined, KeyOutlined,
-  UserOutlined, CrownOutlined, UnorderedListOutlined, SettingOutlined
+  UserOutlined, CrownOutlined, UnorderedListOutlined, SettingOutlined,
+  HomeOutlined
 } from '@ant-design/icons'
 import axios from 'axios'
 import TabPhanQuyen from './components/TabPhanQuyen'
+// ⭐ Import ThongTinChung
+import ThongTinChung from './components/ThongTinChung'
 // ⭐ Thêm import API
 import { monHocAPI, phanMonAPI, soTietAPI } from '../../api/cauHinh'
 
@@ -75,7 +78,7 @@ function SimpleTable({ columns, data, loading, onAdd, onEdit, onDelete, addLabel
 }
 
 // ════════════════════════════════════════════════════
-//  TAB NĂM HỌC
+//  TAB NĂM HỌC (giữ nguyên)
 // ════════════════════════════════════════════════════
 function TabNamHoc() {
   const { data, loading, create, update, remove } = useCRUD('/nam-hoc')
@@ -122,7 +125,7 @@ function TabNamHoc() {
 }
 
 // ════════════════════════════════════════════════════
-//  TAB HỌC KỲ
+//  TAB HỌC KỲ (giữ nguyên)
 // ════════════════════════════════════════════════════
 function TabHocKy() {
   const { data, loading, create, update, remove } = useCRUD('/hoc-ky')
@@ -189,7 +192,7 @@ function TabHocKy() {
 }
 
 // ════════════════════════════════════════════════════
-//  TAB TỔ CHUYÊN MÔN
+//  TAB TỔ CHUYÊN MÔN (giữ nguyên)
 // ════════════════════════════════════════════════════
 function TabToChuyenMon() {
   const { data, loading, create, update, remove } = useCRUD('/to-chuyen-mon')
@@ -243,11 +246,8 @@ function TabToChuyenMon() {
 }
 
 // ════════════════════════════════════════════════════
-//  TAB MÔN HỌC (ĐÃ SỬA)
+//  TAB MÔN HỌC (giữ nguyên)
 // ════════════════════════════════════════════════════
-// frontend/src/pages/CauHinh/CauHinhPage.jsx
-// Thay thế hoàn toàn TabMonHoc bằng code này
-
 function TabMonHoc() {
   const { data, loading, create, update, remove, load } = useCRUD('/mon-hoc')
   const { data: dsTo } = useCRUD('/to-chuyen-mon')
@@ -286,7 +286,7 @@ function TabMonHoc() {
       render: (v) => <Tag color="blue">{tenTo(v)}</Tag>
     },
     {
-      title: 'Phân môn', dataIndex: 'phan_mon_list', width: 230, align: 'center',
+      title: 'Phân môn', dataIndex: 'phan_mon_list', width: 100, align: 'center',
       render: (list) => {
         if (!list || list.length === 0) return <Tag>—</Tag>
         return (
@@ -374,7 +374,6 @@ function TabMonHoc() {
     }
   }
 
-  // ⭐ Xử lý thêm phân môn
   const handleAddPhanMon = () => {
     const newPhanMon = {
       id: Date.now(),
@@ -398,7 +397,6 @@ function TabMonHoc() {
     setPhanMonList(newList)
   }
 
-  // ⭐ Lưu phân môn - DÙNG API TỪ cauHinh.js
   const handleSavePhanMon = async () => {
     try {
       const invalid = phanMonList.some(pm => !pm.ma_phan_mon.trim() || !pm.ten_phan_mon.trim())
@@ -412,15 +410,12 @@ function TabMonHoc() {
         return
       }
 
-      // ⭐ Lấy danh sách phân môn hiện có
       const oldPhanMons = await phanMonAPI.getByMonHoc(currentMonHocId)
 
-      // ⭐ Xóa TẤT CẢ phân môn cũ (chỉ gọi 1 lần)
       if (oldPhanMons.data && oldPhanMons.data.length > 0) {
         await phanMonAPI.deleteByMonHoc(currentMonHocId)
       }
 
-      // ⭐ Thêm phân môn mới
       for (const pm of phanMonList) {
         if (pm.ma_phan_mon.trim() && pm.ten_phan_mon.trim()) {
           await phanMonAPI.create({
@@ -446,7 +441,6 @@ function TabMonHoc() {
     }
   }
 
-  // ⭐ Cập nhật số tiết theo khối
   const handleUpdateKhoiTiet = (khoi, value) => {
     const newList = khoiTietList.map(item =>
       item.khoi === khoi ? { ...item, so_tiet: parseInt(value) || 0 } : item
@@ -454,7 +448,6 @@ function TabMonHoc() {
     setKhoiTietList(newList)
   }
 
-  // ⭐ Lưu số tiết theo khối - DÙNG API TỪ cauHinh.js
   const handleSaveKhoiTiet = async () => {
     try {
       if (!currentMonHocId) {
@@ -462,10 +455,8 @@ function TabMonHoc() {
         return
       }
 
-      // ⭐ Xóa số tiết cũ
       await soTietAPI.deleteByMonHoc(currentMonHocId)
 
-      // ⭐ Thêm số tiết mới
       let count = 0
       for (const item of khoiTietList) {
         if (item.so_tiet > 0) {
@@ -491,7 +482,6 @@ function TabMonHoc() {
     }
   }
 
-  // ⭐ Mở modal quản lý phân môn
   const handleOpenPhanMonModal = () => {
     if (!currentMonHocId && !edit) {
       message.warning('Vui lòng lưu môn học trước khi thêm phân môn')
@@ -500,7 +490,6 @@ function TabMonHoc() {
     setOpenPhanMonModal(true)
   }
 
-  // ⭐ Mở modal cấu hình số tiết
   const handleOpenKhoiTietModal = () => {
     if (!currentMonHocId && !edit) {
       message.warning('Vui lòng lưu môn học trước khi cấu hình số tiết')
@@ -697,7 +686,7 @@ function TabMonHoc() {
 }
 
 // ════════════════════════════════════════════════════
-//  TAB TIẾT HỌC
+//  TAB TIẾT HỌC (giữ nguyên)
 // ════════════════════════════════════════════════════
 function TabTietHoc() {
   const { data, loading, create, update, remove } = useCRUD('/tiet-hoc')
@@ -748,7 +737,7 @@ function TabTietHoc() {
 }
 
 // ════════════════════════════════════════════════════
-//  TAB TÀI KHOẢN
+//  TAB TÀI KHOẢN (giữ nguyên)
 // ════════════════════════════════════════════════════
 
 const ROLE_CONFIG = {
@@ -907,10 +896,19 @@ function TabTaiKhoan() {
 }
 
 // ════════════════════════════════════════════════════
+//  ⭐ TAB THÔNG TIN CHUNG (MỚI)
+// ════════════════════════════════════════════════════
+function TabThongTinChung() {
+  return <ThongTinChung />
+}
+
+// ════════════════════════════════════════════════════
 //  TRANG CHÍNH
 // ════════════════════════════════════════════════════
 export default function CauHinhPage() {
   const tabs = [
+    // ⭐ Thêm tab Thông tin chung ở đầu
+    { key: 'thong-tin-chung', label: '🏫 Thông tin chung', children: <TabThongTinChung /> },
     { key: 'nam-hoc', label: '📅 Năm học', children: <TabNamHoc /> },
     { key: 'hoc-ky', label: '🗓 Học kỳ', children: <TabHocKy /> },
     { key: 'to-chuyen-mon', label: '👥 Tổ chuyên môn', children: <TabToChuyenMon /> },

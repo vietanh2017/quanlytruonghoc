@@ -31,7 +31,6 @@ class NguoiDungBrief(BaseModel):
 # ── Giáo viên ─────────────────────────────────────────────────
 
 class GiaoVienCreate(BaseModel):
-    """Dùng cho POST /giao-vien/ — tạo mới"""
     ho_ten: str
     email: EmailStr
     mat_khau: Optional[str] = "eduschool@123"
@@ -39,6 +38,7 @@ class GiaoVienCreate(BaseModel):
     mon_day: Optional[str] = ""
     to_id: Optional[int] = None
     so_dien_thoai: Optional[str] = ""
+    kiem_nhiem: Optional[str] = ""  # ✅ Thêm
     active: Optional[bool] = True
 
     @field_validator("ho_ten", "ma_giao_vien")
@@ -50,7 +50,6 @@ class GiaoVienCreate(BaseModel):
 
 
 class GiaoVienUpdate(BaseModel):
-    """Dùng cho PUT /giao-vien/{id} — cập nhật"""
     ho_ten: Optional[str] = None
     email: Optional[EmailStr] = None
     mat_khau: Optional[str] = None
@@ -58,15 +57,16 @@ class GiaoVienUpdate(BaseModel):
     mon_day: Optional[str] = None
     to_id: Optional[int] = None
     so_dien_thoai: Optional[str] = None
+    kiem_nhiem: Optional[str] = None  # ✅ Thêm
     active: Optional[bool] = None
 
 
 class GiaoVienResponse(BaseModel):
-    """Dùng cho tất cả response trả về"""
     id: int
     ma_giao_vien: str
     mon_day: str
     so_dien_thoai: str
+    kiem_nhiem: Optional[str] = ""  # ✅ Thêm
     active: bool
     nguoi_dung: Optional[NguoiDungBrief] = None
     to_chuyen_mon: Optional[ToChuyenMonBrief] = None

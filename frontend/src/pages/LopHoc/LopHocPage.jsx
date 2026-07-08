@@ -484,14 +484,14 @@ export default function LopHocPage() {
     {
       title: 'Sĩ số',
       dataIndex: 'si_so',
-      width: 60,
+      width: 40,
       align: 'center',
       render: (text) => <Tag color="blue" style={{ fontSize: 12, margin: 0 }}>{text}</Tag>
     },
     {
       title: 'GVCN',
       dataIndex: 'ten_gvcn',
-      width: 180,
+      width: 150,
       render: (v) => v ? (
         <Space size={4}>
           <Avatar size={18} icon={<UserOutlined />} style={{ flexShrink: 0 }} />
@@ -504,7 +504,7 @@ export default function LopHocPage() {
     },
     {
       title: 'Trạng thái',
-      width: 100,
+      width: 80,
       align: 'center',
       render: (_, r) => (
         <Tag color={r.active ? 'success' : 'error'} style={{ fontSize: 12, margin: 0 }}>
@@ -514,7 +514,7 @@ export default function LopHocPage() {
     },
     {
       title: 'Thao tác',
-      width: 100,
+      width: 90,
       align: 'center',
       render: (_, r) => (
         <Space size={4} style={{ whiteSpace: 'nowrap' }}>
@@ -624,7 +624,7 @@ export default function LopHocPage() {
     {
       title: 'Mã HS',
       dataIndex: 'ma_hoc_sinh',
-      width: 70,
+      width: 55,
       align: 'center',
       render: (text) => <Text strong style={{ fontSize: 13 }}>{text}</Text>,
       ellipsis: true
@@ -638,7 +638,7 @@ export default function LopHocPage() {
     },
     {
       title: 'Thao tác',
-      width: 80,
+      width: 55,
       align: 'center',
       render: (_, r) => (
         <Space size={4} style={{ whiteSpace: 'nowrap' }}>
@@ -663,8 +663,6 @@ export default function LopHocPage() {
 
   // ── Chọn cột học sinh dựa trên trạng thái ──────────────────
   const getHsColumns = () => {
-    // Khi bảng trái thu gọn (isLopCompact = true) -> hiển thị đầy đủ
-    // Khi bảng trái mở rộng (isLopCompact = false) -> hiển thị thu gọn
     return isLopCompact ? colHsFull : colHsCompact
   }
 
@@ -676,7 +674,7 @@ export default function LopHocPage() {
       <Card style={{ marginBottom: 16 }}>
         <Row justify="space-between" align="middle">
           <Col>
-            <Title level={2} style={{ margin: 0, display: 'flex', alignItems: 'center', gap: 12 }}>
+            <Title level={2} style={{ margin: 0, display: 'flex', alignItems: 'center', fontSize: 18, gap: 12 }}>
               <BookOutlined style={{ color: '#1890ff' }} />
               Quản lý Học Sinh
               <Badge count={stats.total} style={{ marginLeft: 12 }} />
@@ -689,11 +687,11 @@ export default function LopHocPage() {
                 prefix={<SearchOutlined />}
                 value={searchLop}
                 onChange={e => setSearchLop(e.target.value)}
-                style={{ width: 200 }}
+                style={{ width: 290 }}
                 allowClear
-                size="large"
+                size="small"
               />
-              <Button icon={<ReloadOutlined />} onClick={loadLop} size="large">
+              <Button icon={<ReloadOutlined />} onClick={loadLop} size="small">
                 Làm mới
               </Button>
               {selLop && (
@@ -701,14 +699,14 @@ export default function LopHocPage() {
                   <Button
                     icon={isLopCompact ? <MenuUnfoldOutlined /> : <MenuFoldOutlined />}
                     onClick={() => setIsLopCompact(!isLopCompact)}
-                    size="large"
+                    size="small"
                   >
                     {isLopCompact ? 'Mở rộng' : 'Thu gọn'}
                   </Button>
                 </Tooltip>
               )}
               {selLop && (
-                <Button onClick={onBoChonLop} size="large">
+                <Button onClick={onBoChonLop} size="small">
                   Bỏ chọn
                 </Button>
               )}
@@ -716,7 +714,7 @@ export default function LopHocPage() {
                 type="primary"
                 icon={<PlusOutlined />}
                 onClick={handleThemLop}
-                size="large"
+                size="small"
               >
                 Thêm lớp
               </Button>
@@ -733,7 +731,7 @@ export default function LopHocPage() {
               title="Tổng số lớp"
               value={stats.total}
               prefix={<BookOutlined />}
-              styles={{ content: { color: '#1890ff', fontSize: 24 } }}
+              styles={{ content: { color: '#1890ff', fontSize: 16 } }}
             />
           </Card>
         </Col>
@@ -743,7 +741,7 @@ export default function LopHocPage() {
               title="Đang hoạt động"
               value={stats.active}
               prefix={<CheckCircleOutlined />}
-              styles={{ content: { color: '#52c41a', fontSize: 24 } }}
+              styles={{ content: { color: '#52c41a', fontSize: 16 } }}
             />
           </Card>
         </Col>
@@ -753,7 +751,7 @@ export default function LopHocPage() {
               title="Vô hiệu"
               value={stats.inactive}
               prefix={<CloseCircleOutlined />}
-              styles={{ content: { color: '#ff4d4f', fontSize: 24 } }}
+              styles={{ content: { color: '#ff4d4f', fontSize: 16 } }}
             />
           </Card>
         </Col>
@@ -763,7 +761,7 @@ export default function LopHocPage() {
               title="Tổng học sinh"
               value={stats.totalStudents}
               prefix={<TeamOutlined />}
-              styles={{ content: { color: '#faad14', fontSize: 24 } }}
+              styles={{ content: { color: '#faad14', fontSize: 16 } }}
             />
           </Card>
         </Col>
@@ -775,21 +773,27 @@ export default function LopHocPage() {
 
           {/* ── Bảng lớp học (trái) ── */}
           <div style={{
-            flex: isLopCompact ? '0 0 200px' : '0 0 60%',
+            flex: isLopCompact ? '0 0 200px' : '0 0 65%',
             minWidth: 0,
             transition: 'all 0.3s ease',
             overflow: 'hidden'
           }}>
+            {/* ⭐ HEADER BẢNG LỚP - ĐÃ SỬA */}
             <div style={{
               display: 'flex',
               justifyContent: 'space-between',
               alignItems: 'center',
-              marginBottom: 16
+              marginBottom: 12,
+              padding: '0 4px'
             }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                <Title level={5} style={{ margin: 0, fontSize: isLopCompact ? 13 : 15 }}>
+                <span style={{
+                  fontWeight: 600,
+                  fontSize: isLopCompact ? 15 : 15,
+                  color: '#1a1a1a'
+                }}>
                   {isLopCompact ? '📋 Lớp' : '🏫 Danh sách lớp học'}
-                </Title>
+                </span>
                 <Badge
                   count={filteredLop.length}
                   style={{
@@ -831,27 +835,47 @@ export default function LopHocPage() {
 
           {/* ── Bảng học sinh (phải) ── */}
           <div style={{
-            flex: isLopCompact ? 1 : '0 0 36%',
+            flex: isLopCompact ? 1 : '0 0 32%',
             minWidth: 0,
             transition: 'all 0.3s ease',
             overflow: 'hidden'
           }}>
+            {/* ⭐ HEADER BẢNG HỌC SINH - ĐÃ SỬA */}
             <div style={{
               display: 'flex',
+              flexDirection: 'column',
               justifyContent: 'space-between',
-              alignItems: 'center',
-              marginBottom: 16
+
+              marginBottom: 12,
+              padding: '0 4px',
+              flexWrap: 'nowrap',
+              gap: 8
             }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                <Title level={5} style={{ margin: 0, fontSize: 15 }}>
-                  👨‍🎓 {selLop ? `HS lớp ${selLop.ten_lop}` : 'Chọn lớp để xem học sinh'}
-                </Title>
-                {selLop && <Badge count={dsHs.length} style={{ backgroundColor: '#52c41a' }} />}
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexShrink: 1, minWidth: 0 }}>
+                <span style={{
+                  fontWeight: 600,
+                  fontSize: isLopCompact ? 15 : 15, whiteSpace: 'nowrap',
+                  color: '#1a1a1a'
+                }}>
+                  👨‍🎓 {selLop ? `Học sinh lớp ${selLop.ten_lop}` : 'Chọn lớp để xem học sinh'}
+                </span>
+                {selLop && (
+                  <Badge
+                    count={dsHs.length}
+                    style={{
+                      backgroundColor: '#52c41a',
+                      fontSize: isLopCompact ? 10 : 12
+                    }}
+                  />
+                )}
               </div>
               {selLop && (
-                <Space>
+                <Space size={4}>
                   <Tooltip title="Xuất Excel">
-                    <Button icon={<ExportOutlined />} size={isLopCompact ? 'small' : 'middle'} />
+                    <Button
+                      icon={<ExportOutlined />}
+                      size={isLopCompact ? 'small' : 'middle'}
+                    />
                   </Tooltip>
                   <Button
                     icon={<FileExcelOutlined />}

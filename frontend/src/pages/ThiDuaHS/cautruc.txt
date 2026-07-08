@@ -1,0 +1,23 @@
+frontend/src/pages/ThiDuaHS/
+├── index.jsx                          ✅
+├── hooks/
+│   └── useMeta.js                     ✅
+├── services/
+│   └── api.js                         ✅
+├── utils/
+│   └── constants.js                   ✅
+├── components/
+│   ├── TabTapThe.jsx                  ✅
+│   ├── TabCaNhan.jsx                  ✅
+│   ├── TabDanhMuc.jsx                 ✅
+│   └── TabThang.jsx                   ✅
+├── tables/
+│   ├── BangTongHopLop.jsx             ✅
+│   ├── BangDiemTuan.jsx               ✅
+│   └── BangHocSinh.jsx                ✅
+└── modals/
+    ├── ModalThemVPTapThe.jsx          ✅
+    ├── ModalThemVPCaNhan.jsx          ✅
+    ├── ModalSuaVPTapThe.jsx           ✅
+    ├── ModalSuaVPCaNhan.jsx           ✅
+    └── ModalBaoCaoThang.jsx           ✅

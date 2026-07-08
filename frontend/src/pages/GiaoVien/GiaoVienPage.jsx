@@ -22,6 +22,38 @@ const apiCauHinh = axios.create({ baseURL: 'http://localhost:8000/api/v1/cau-hin
 const { Title, Text } = Typography
 const { Dragger } = Upload
 
+// ⭐ DANH SÁCH KIÊM NHIỆM
+const KIEM_NHIEM_LIST = [
+  { value: '', label: '-- Không có --' },
+  { value: 'Tổ trưởng CM', label: 'Tổ trưởng CM' },
+  { value: 'Tổ phó CM', label: 'Tổ phó CM' },
+  { value: 'Bí thư Đoàn', label: 'Bí thư Đoàn' },
+  { value: 'Phó BT Đoàn', label: 'Phó BT Đoàn' },
+  { value: 'TPT Đội', label: 'TPT Đội' },
+  { value: 'Nữ công', label: 'Nữ công' },
+  { value: 'Phòng bộ môn', label: 'Phòng bộ môn' },
+  { value: 'TK hội đồng', label: 'TK hội đồng' },
+  { value: 'Thủ quỹ', label: 'Thủ quỹ' },
+  { value: 'YT học đường', label: 'YT học đường' },
+  { value: 'Khác', label: 'Khác' },
+]
+// frontend/src/pages/GiaoVien/GiaoVienPage.jsx
+
+// ⭐ THÊM MAP SỐ TIẾT GIẢM
+const SO_TIET_GIAM = {
+  'Tổ trưởng CM': 2,
+  'Tổ phó CM': 1,
+  'Bí thư Đoàn': 2,
+  'Phó BT Đoàn': 1,
+  'TPT Đội': 2,
+  'Nữ công': 2,
+  'Phòng bộ môn': 3,
+  'TK hội đồng': 1,
+  'Thủ quỹ': 1,
+  'YT đường': 2,
+  'Khác': 1,
+}
+
 export default function GiaoVienPage() {
   const [data, setData] = useState([])
   const [loading, setLoading] = useState(false)
@@ -70,7 +102,8 @@ export default function GiaoVienPage() {
   const filtered = data.filter(gv =>
     gv.ma_giao_vien.toLowerCase().includes(search.toLowerCase()) ||
     gv.nguoi_dung?.ho_ten.toLowerCase().includes(search.toLowerCase()) ||
-    gv.mon_day?.toLowerCase().includes(search.toLowerCase())
+    gv.mon_day?.toLowerCase().includes(search.toLowerCase()) ||
+    (gv.kiem_nhiem || '').toLowerCase().includes(search.toLowerCase())  // ⭐ THÊM TÌM THEO KIÊM NHIỆM
   )
 
   // ── Thống kê ──────────────────────────────────────────────
@@ -97,6 +130,7 @@ export default function GiaoVienPage() {
       mon_day: record.mon_day,
       so_dien_thoai: record.so_dien_thoai,
       to_id: record.to_chuyen_mon?.id ?? null,
+      kiem_nhiem: record.kiem_nhiem || '',  // ⭐ THÊM
     })
     setModalOpen(true)
   }
@@ -105,11 +139,22 @@ export default function GiaoVienPage() {
   const handleLuu = async () => {
     try {
       const values = await form.validateFields()
+      const payload = {
+        ma_giao_vien: values.ma_giao_vien,
+        ho_ten: values.ho_ten,
+        email: values.email,
+        mon_day: values.mon_day || '',
+        so_dien_thoai: values.so_dien_thoai || '',
+        to_id: values.to_id || null,
+        kiem_nhiem: values.kiem_nhiem || '',  // ⭐ THÊM DÒNG NÀY
+        active: true,
+      }
+
       if (editItem) {
-        await giaoVienApi.update(editItem.id, values)
+        await giaoVienApi.update(editItem.id, payload)
         message.success('Cập nhật giáo viên thành công')
       } else {
-        await giaoVienApi.create(values)
+        await giaoVienApi.create(payload)
         message.success('Thêm giáo viên thành công')
       }
       setModalOpen(false)
@@ -119,7 +164,6 @@ export default function GiaoVienPage() {
       if (detail) message.error(detail)
     }
   }
-
   // ── Xóa ────────────────────────────────────────────────────
   const handleXoa = async (id) => {
     try {
@@ -153,16 +197,16 @@ export default function GiaoVienPage() {
 
   // ── Tải file mẫu ────────────────────────────────────────────
   const downloadSampleFile = () => {
-    // Lấy danh sách tổ từ state
     const toList = danhSachTo.map(to => to.ten_to)
     const defaultTo = toList.length > 0 ? toList[0] : 'Tổ Toán'
 
+    // ⭐ THÊM CỘT KIÊM NHIỆM VÀO FILE MẪU
     const sampleData = [
-      ['Mã giáo viên', 'Họ tên', 'Email', 'Mật khẩu', 'Môn dạy', 'Số điện thoại', 'Tổ chuyên môn', 'Trạng thái'],
-      ['GV001', 'Nguyễn Văn A', 'a.nguyen@school.com', 'eduschool@123', 'Toán', '0901234567', defaultTo, 'Hoạt động'],
-      ['GV002', 'Trần Thị B', 'b.tran@school.com', 'eduschool@123', 'Văn', '0909876543', toList.length > 1 ? toList[1] : defaultTo, 'Hoạt động'],
-      ['GV003', 'Lê Văn C', 'c.le@school.com', 'eduschool@123', 'Anh', '0912345678', toList.length > 2 ? toList[2] : defaultTo, 'Hoạt động'],
-      ['GV004', 'Phạm Thị D', 'd.pham@school.com', 'eduschool@123', 'Lý', '0923456789', toList.length > 3 ? toList[3] : defaultTo, 'Vô hiệu'],
+      ['Mã giáo viên', 'Họ tên', 'Email', 'Mật khẩu', 'Môn dạy', 'Số điện thoại', 'Tổ chuyên môn', 'Kiêm nhiệm', 'Trạng thái'],
+      ['GV001', 'Nguyễn Văn A', 'a.nguyen@school.com', 'eduschool@123', 'Toán', '0901234567', defaultTo, 'Tổ trưởng chuyên môn', 'Hoạt động'],
+      ['GV002', 'Trần Thị B', 'b.tran@school.com', 'eduschool@123', 'Văn', '0909876543', toList.length > 1 ? toList[1] : defaultTo, 'Bí thư Đoàn', 'Hoạt động'],
+      ['GV003', 'Lê Văn C', 'c.le@school.com', 'eduschool@123', 'Anh', '0912345678', toList.length > 2 ? toList[2] : defaultTo, '', 'Hoạt động'],
+      ['GV004', 'Phạm Thị D', 'd.pham@school.com', 'eduschool@123', 'Lý', '0923456789', toList.length > 3 ? toList[3] : defaultTo, '', 'Vô hiệu'],
     ]
 
     const wb = XLSX.utils.book_new()
@@ -176,6 +220,7 @@ export default function GiaoVienPage() {
       { wch: 15 },
       { wch: 18 },
       { wch: 20 },
+      { wch: 10 },  // ⭐ CỘT KIÊM NHIỆM
       { wch: 15 },
     ]
 
@@ -193,9 +238,9 @@ export default function GiaoVienPage() {
 
     message.success('Đã tải file mẫu thành công!')
   }
+
   // ── Import Excel ────────────────────────────────────────────
   const handleImportExcel = async () => {
-    // ⭐ Lấy file từ fileList thay vì nhận tham số
     if (fileList.length === 0) {
       message.warning('Vui lòng chọn file Excel')
       return
@@ -260,7 +305,7 @@ export default function GiaoVienPage() {
         ]}
         width={700}
       >
-        <div style={{ marginBottom: 16 }}>
+        <div style={{ marginBottom: 8 }}>
           <Space size="large">
             <div><strong>Tổng số:</strong> {tong_so}</div>
             <div style={{ color: '#52c41a' }}><strong>Thành công:</strong> {thanh_cong}</div>
@@ -269,7 +314,7 @@ export default function GiaoVienPage() {
         </div>
 
         {da_them?.length > 0 && (
-          <div style={{ marginBottom: 16 }}>
+          <div style={{ marginBottom: 8 }}>
             <strong>✅ Đã thêm:</strong>
             <div style={{ maxHeight: 100, overflow: 'auto', background: '#f6ffed', padding: 8, borderRadius: 4 }}>
               {da_them.map((item, idx) => (
@@ -300,48 +345,62 @@ export default function GiaoVienPage() {
     )
   }
 
-  // ── Cột bảng ───────────────────────────────────────────────
+  // ⭐ THÊM CỘT KIÊM NHIỆM VÀO BẢNG
   const columns = [
     {
       title: 'Mã GV',
       dataIndex: 'ma_giao_vien',
-      width: 100, align: 'center',
+      width: 80, align: 'center',
       sorter: (a, b) => a.ma_giao_vien.localeCompare(b.ma_giao_vien),
     },
     {
       title: 'Họ tên',
+      width: 190,
       render: (_, r) => r.nguoi_dung?.ho_ten || '—',
       sorter: (a, b) =>
         (a.nguoi_dung?.ho_ten || '').localeCompare(b.nguoi_dung?.ho_ten || ''),
     },
     {
-      title: 'Email',
+      title: 'Email', width: 90,
       render: (_, r) => r.nguoi_dung?.email || '—',
     },
     {
-      title: 'Môn dạy', align: 'center',
+      title: 'Môn dạy', align: 'center', width: 90,
       dataIndex: 'mon_day',
     },
     {
       title: 'Tổ CM',
+      width: 90, align: 'center',
       render: (_, r) => r.to_chuyen_mon?.ten_to || '—',
     },
+    // ⭐ THÊM CỘT KIÊM NHIỆM
     {
-      title: 'SĐT', align: 'center',
-      dataIndex: 'so_dien_thoai',
+      title: 'Kiêm nhiệm',
+      width: 60, align: 'center',
+      dataIndex: 'kiem_nhiem',
+      render: (v) => v ? <Tag color="purple">{v}</Tag> : <Tag color="default">—</Tag>,
     },
     {
-      title: 'Trạng thái', align: 'center',
+      title: 'Tiết giảm',
+      width: 50, align: 'center',
+      render: (_, r) => {
+        const giam = SO_TIET_GIAM[r.kiem_nhiem] || 0
+        return giam > 0 ? <Tag color="orange">{giam}</Tag> : <Tag>0</Tag>
+      },
+    },
+    {
+      title: 'Trạng thái',
+      align: 'center',
       render: (_, r) => (
         <Tag color={r.active ? 'green' : 'red'}>
           {r.active ? 'Hoạt động' : 'Vô hiệu'}
         </Tag>
       ),
-      width: 110,
+      width: 90,
     },
     {
       title: 'Thao tác', align: 'center',
-      width: 160,
+      width: 140,
       render: (_, r) => (
         <Space size={4}>
           <Tooltip title="Sửa">
@@ -413,38 +472,38 @@ export default function GiaoVienPage() {
     <div style={{ padding: 24, background: '#f0f2f5', minHeight: '100vh' }}>
 
       {/* Header */}
-      <Card style={{ marginBottom: 16 }}>
+      <Card style={{ marginBottom: 8 }}>
         <Row justify="space-between" align="middle">
           <Col>
-            <Title level={2} style={{ margin: 0, display: 'flex', alignItems: 'center', gap: 12 }}>
+            <Title level={2} style={{ margin: 0, display: 'flex', alignItems: 'center', fontSize: 18, gap: 12 }}>
               <BookOutlined style={{ color: '#1890ff' }} />
               Quản lý Giáo Viên
-              <Badge count={stats.total} style={{ marginLeft: 12 }} />
+              <Badge count={stats.total} style={{ marginLeft: 10 }} />
             </Title>
           </Col>
           <Col>
             <Space size="middle" wrap>
               <Input
-                placeholder="Tìm theo mã, tên, môn..."
+                placeholder="Tìm theo mã, tên, môn, kiêm nhiệm..."
                 prefix={<SearchOutlined />}
                 value={search}
                 onChange={e => setSearch(e.target.value)}
-                style={{ width: 240 }}
+                style={{ width: 290 }}
                 allowClear
-                size="large"
+                size="small"
               />
               <Button
                 icon={<FileExcelOutlined />}
                 onClick={() => setImportModalVisible(true)}
-                size="large"
+                size="small"
                 style={{ color: '#52c41a', borderColor: '#52c41a' }}
               >
                 Import Excel
               </Button>
-              <Button icon={<ReloadOutlined />} onClick={loadData} size="large">
+              <Button icon={<ReloadOutlined />} onClick={loadData} size="small">
                 Làm mới
               </Button>
-              <Button type="primary" icon={<PlusOutlined />} onClick={handleThem} size="large">
+              <Button type="primary" icon={<PlusOutlined />} onClick={handleThem} size="small">
                 Thêm giáo viên
               </Button>
             </Space>
@@ -453,14 +512,14 @@ export default function GiaoVienPage() {
       </Card>
 
       {/* Thống kê */}
-      <Row gutter={[16, 16]} style={{ marginBottom: 16 }}>
+      <Row gutter={[16, 12]} style={{ marginBottom: 8 }}>
         <Col xs={24} sm={12} md={8}>
           <Card>
             <Statistic
               title="Tổng số giáo viên"
               value={stats.total}
               prefix={<UserOutlined />}
-              styles={{ content: { color: '#1890ff', fontSize: 24 } }}
+              styles={{ content: { color: '#1890ff', fontSize: 16 } }}
             />
           </Card>
         </Col>
@@ -470,7 +529,7 @@ export default function GiaoVienPage() {
               title="Đang hoạt động"
               value={stats.active}
               prefix={<CheckCircleOutlined />}
-              styles={{ content: { color: '#52c41a', fontSize: 24 } }}
+              styles={{ content: { color: '#52c41a', fontSize: 16 } }}
             />
           </Card>
         </Col>
@@ -480,7 +539,7 @@ export default function GiaoVienPage() {
               title="Vô hiệu"
               value={stats.inactive}
               prefix={<CloseCircleOutlined />}
-              styles={{ content: { color: '#ff4d4f', fontSize: 24 } }}
+              styles={{ content: { color: '#ff4d4f', fontSize: 16 } }}
             />
           </Card>
         </Col>
@@ -488,7 +547,7 @@ export default function GiaoVienPage() {
 
       {/* Progress khi import */}
       {importing && (
-        <div style={{ marginBottom: 16 }}>
+        <div style={{ marginBottom: 8 }}>
           <Progress percent={importProgress} status="active" />
           <span style={{ fontSize: 12, color: '#999' }}>
             Đang xử lý file Excel...
@@ -503,7 +562,7 @@ export default function GiaoVienPage() {
           columns={columns}
           dataSource={filtered}
           loading={loading}
-          pagination={{ pageSize: 15, showTotal: (t) => `Tổng: ${t} giáo viên` }}
+          pagination={{ pageSize: 13, showTotal: (t) => `Tổng: ${t} giáo viên` }}
           size="middle"
           bordered
         />
@@ -555,11 +614,11 @@ export default function GiaoVienPage() {
         width={600}
         centered
       >
-        <div style={{ padding: '16px 0' }}>
-          <p style={{ marginBottom: 16 }}>
+        <div style={{ padding: '14px 0' }}>
+          <p style={{ marginBottom: 8 }}>
             <strong>Hướng dẫn:</strong> File Excel cần có các cột sau (hàng đầu là tiêu đề):
           </p>
-          <ul style={{ marginBottom: 16 }}>
+          <ul style={{ marginBottom: 8 }}>
             <li><strong>Mã giáo viên</strong> (bắt buộc) - VD: GV001</li>
             <li><strong>Họ tên</strong> (bắt buộc) - VD: Nguyễn Văn A</li>
             <li><strong>Email</strong> (bắt buộc) - VD: a.nguyen@school.com</li>
@@ -567,17 +626,18 @@ export default function GiaoVienPage() {
             <li><strong>Môn dạy</strong> - VD: Toán</li>
             <li><strong>Số điện thoại</strong> - 10-11 chữ số</li>
             <li><strong>Tổ chuyên môn</strong> - Tên tổ đã có trong hệ thống</li>
+            <li><strong>Kiêm nhiệm</strong> - VD: Tổ trưởng, Bí thư Đoàn...</li>  {/* ⭐ THÊM */}
             <li><strong>Trạng thái</strong> - "Hoạt động" hoặc "Vô hiệu"</li>
           </ul>
 
-          <div style={{ marginBottom: 16, background: '#f6ffed', padding: 12, borderRadius: 4, border: '1px solid #b7eb8f' }}>
+          <div style={{ marginBottom: 8, background: '#f6ffed', padding: 12, borderRadius: 4, border: '1px solid #b7eb8f' }}>
             <Text type="secondary" style={{ fontSize: 12 }}>
               💡 <strong>Lưu ý:</strong> Click vào nút <strong>"Tải file mẫu"</strong> để tải file Excel mẫu về máy, sau đó điền dữ liệu và upload lên.
             </Text>
           </div>
 
           {importing && (
-            <div style={{ marginBottom: 16 }}>
+            <div style={{ marginBottom: 8 }}>
               <Progress percent={importProgress} status="active" />
               <span style={{ fontSize: 12, color: '#999' }}>Đang xử lý file...</span>
             </div>
@@ -594,48 +654,54 @@ export default function GiaoVienPage() {
           </Dragger>
 
           {fileList.length > 0 && (
-            <div style={{ marginTop: 12, color: '#52c41a' }}>
+            <div style={{ marginTop: 8, color: '#52c41a' }}>
               ✅ Đã chọn file: {fileList[0].name}
             </div>
           )}
         </div>
       </Modal>
 
-      {/* Modal thêm/sửa */}
+      {/* Modal thêm/sửa - ⭐ THÊM TRƯỜNG KIÊM NHIỆM */}
       <Modal
         title={editItem ? '✏️ Cập nhật giáo viên' : '➕ Thêm giáo viên mới'}
         open={modalOpen}
         onOk={handleLuu}
         onCancel={() => setModalOpen(false)}
-        okText={editItem ? 'Cập nhật' : 'Thêm mới'}
-        cancelText="Hủy"
-        width={520}
+        width={500}
         centered
+        bodyStyle={{ padding: '12px 16px' }}
       >
-        <Form form={form} layout="vertical" style={{ marginTop: 16 }}>
+        <Form
+          form={form}
+          layout="horizontal"
+          labelCol={{ span: 6 }}
+          wrapperCol={{ span: 25 }}
+          size="small"
+          style={{ marginTop: 16 }}
+        >
           <Form.Item name="ho_ten" label="Họ tên"
             rules={[{ required: true, message: 'Nhập họ tên' }]}>
-            <Input placeholder="Nguyễn Văn A" size="large" />
+            <Input placeholder="Nguyễn Văn A" size="small" />
           </Form.Item>
 
           <Form.Item name="email" label="Email"
             rules={[{ required: true, type: 'email', message: 'Email không hợp lệ' }]}>
-            <Input placeholder="email@truonghoc.com" size="large" />
+            <Input placeholder="email@truonghoc.com" size="small" />
           </Form.Item>
 
           {!editItem && (
             <Form.Item name="mat_khau" label="Mật khẩu">
-              <Input.Password placeholder="Mặc định: eduschool@123" size="large" />
+              <Input.Password placeholder="Mặc định: eduschool@123" size="small" />
             </Form.Item>
           )}
 
           <Form.Item name="ma_giao_vien" label="Mã giáo viên"
             rules={[{ required: true, message: 'Nhập mã giáo viên' }]}>
-            <Input placeholder="GV001" size="large" />
+            <Input placeholder="GV001" size="small" />
           </Form.Item>
 
           <Form.Item name="mon_day" label="Môn dạy">
-            <Input placeholder="Toán, Văn, Anh..." size="large" />
+            <Input placeholder="Toán, Văn, Anh..." size="small" />
           </Form.Item>
 
           <Form.Item name="to_id" label="Tổ chuyên môn">
@@ -644,7 +710,7 @@ export default function GiaoVienPage() {
               allowClear
               showSearch
               optionFilterProp="label"
-              size="large"
+              size="small"
               options={danhSachTo.map(to => ({
                 value: to.id,
                 label: to.ten_to,
@@ -652,8 +718,20 @@ export default function GiaoVienPage() {
             />
           </Form.Item>
 
+          {/* ⭐ THÊM TRƯỜNG KIÊM NHIỆM */}
+          <Form.Item name="kiem_nhiem" label="Kiêm nhiệm">
+            <Select
+              placeholder="-- Chọn kiêm nhiệm --"
+              allowClear
+              showSearch
+              optionFilterProp="label"
+              size="small"
+              options={KIEM_NHIEM_LIST}
+            />
+          </Form.Item>
+
           <Form.Item name="so_dien_thoai" label="Số điện thoại">
-            <Input placeholder="0901234567" size="large" />
+            <Input placeholder="0901234567" size="small" />
           </Form.Item>
         </Form>
       </Modal>

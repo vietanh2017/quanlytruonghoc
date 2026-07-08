@@ -13,6 +13,9 @@ from modules.cau_hinh.schemas import (
     NguoiDungCreate, NguoiDungUpdate, NguoiDungResponse, ResetMatKhauRequest,
     TietHocCreate, TietHocUpdate, TietHocResponse, PhanMonCreate, PhanMonUpdate, PhanMonResponse,
     MonHocKhoiCreate, MonHocKhoiUpdate, MonHocKhoiResponse,
+    # ⭐ THÊM IMPORT
+    ThongTinTruongCreate, ThongTinTruongUpdate, ThongTinTruongResponse,
+    CauHinhChungCreate, CauHinhChungUpdate, CauHinhChungResponse,
 )
 from core.db.models.quyen import QuyenModel
 from core.db.models.vai_tro_quyen import VaiTroQuyenModel
@@ -216,6 +219,7 @@ def xoa_phan_mon_theo_mon(mon_hoc_id: int, svc: CauHinhService = Depends(get_svc
     except Exception as e:
         svc._rollback()
         raise HTTPException(400, detail=str(e))
+
 from core.db.models.mon_hoc import PhanMon
 
 class PhanMonResponse(PydanticBase):
@@ -338,6 +342,97 @@ def xoa_tiet(id: int, svc: CauHinhService = Depends(get_svc)):
     return {"message": r.error}
 
 
+# ═══════════════════════════════════════════════════════════════
+# ⭐ THÊM ENDPOINT CHO THÔNG TIN TRƯỜNG
+# ═══════════════════════════════════════════════════════════════
+
+@router.get("/thong-tin-truong", response_model=ThongTinTruongResponse)
+def lay_thong_tin_truong(svc: CauHinhService = Depends(get_svc)):
+    """Lấy thông tin trường (chỉ có 1 bản ghi)"""
+    r = svc.lay_thong_tin_truong()
+    if not r.ok:
+        raise HTTPException(500, r.error)
+    return r.data
+
+
+@router.post("/thong-tin-truong", response_model=ThongTinTruongResponse)
+def luu_thong_tin_truong(body: ThongTinTruongCreate, svc: CauHinhService = Depends(get_svc)):
+    """Lưu thông tin trường"""
+    r = svc.luu_thong_tin_truong(body.model_dump())
+    if not r.ok:
+        raise HTTPException(400, r.error)
+    
+    # Trả về dữ liệu mới nhất
+    return svc.lay_thong_tin_truong().data
+
+
+@router.put("/thong-tin-truong", response_model=ThongTinTruongResponse)
+def cap_nhat_thong_tin_truong(body: ThongTinTruongUpdate, svc: CauHinhService = Depends(get_svc)):
+    """Cập nhật thông tin trường"""
+    r = svc.luu_thong_tin_truong(body.model_dump(exclude_none=True))
+    if not r.ok:
+        raise HTTPException(400, r.error)
+    
+    # Trả về dữ liệu mới nhất
+    return svc.lay_thong_tin_truong().data
+
+
+# ═══════════════════════════════════════════════════════════════
+# ⭐ THÊM ENDPOINT CHO CẤU HÌNH CHUNG (KEY-VALUE)
+# ═══════════════════════════════════════════════════════════════
+
+@router.get("/cau-hinh")
+def lay_cau_hinh(key: str, svc: CauHinhService = Depends(get_svc)):
+    """Lấy giá trị cấu hình theo key"""
+    r = svc.lay_cau_hinh(key)
+    if not r.ok:
+        raise HTTPException(500, r.error)
+    return {"key": key, "value": r.data}
+
+
+@router.get("/cau-hinh/tat-ca")
+def lay_tat_ca_cau_hinh(svc: CauHinhService = Depends(get_svc)):
+    """Lấy tất cả cấu hình"""
+    r = svc.lay_tat_ca_cau_hinh()
+    if not r.ok:
+        raise HTTPException(500, r.error)
+    return r.data
+
+
+@router.post("/cau-hinh")
+def luu_cau_hinh(body: CauHinhChungCreate, svc: CauHinhService = Depends(get_svc)):
+    """Lưu cấu hình key-value"""
+    r = svc.luu_cau_hinh(body.key, body.value, body.ghi_chu)
+    if not r.ok:
+        raise HTTPException(400, r.error)
+    return {"message": r.error, "key": body.key, "value": body.value}
+
+
+@router.put("/cau-hinh/{key}")
+def cap_nhat_cau_hinh(key: str, body: CauHinhChungUpdate, svc: CauHinhService = Depends(get_svc)):
+    """Cập nhật cấu hình theo key"""
+    # Lấy ghi_chu hiện tại nếu có
+    current = svc.lay_cau_hinh(key)
+    ghi_chu = body.ghi_chu
+    if not ghi_chu and current.ok and current.data is not None:
+        # Nếu không truyền ghi_chu, giữ nguyên
+        ghi_chu = ""
+    
+    r = svc.luu_cau_hinh(key, body.value, ghi_chu or "")
+    if not r.ok:
+        raise HTTPException(400, r.error)
+    return {"message": r.error, "key": key, "value": body.value}
+
+
+@router.delete("/cau-hinh/{key}")
+def xoa_cau_hinh(key: str, svc: CauHinhService = Depends(get_svc)):
+    """Xóa cấu hình theo key"""
+    r = svc.xoa_cau_hinh(key)
+    if not r.ok:
+        raise HTTPException(400, r.error)
+    return {"message": r.error}
+
+
 # ════════════════════════════════════════════════════
 #  PHÂN QUYỀN
 # ════════════════════════════════════════════════════
@@ -357,10 +452,19 @@ class LuuPhanQuyenRequest(PydanticBase):
 # ⚠️ Route cụ thể PHẢI đứng trước route có {vai_tro}
 @router.get("/phan-quyen/tat-ca-quyen", response_model=list[QuyenResponse])
 def lay_tat_ca_quyen(db: Session = Depends(get_db)):
-    return (db.query(QuyenModel)
-              .filter(QuyenModel.active == True)
-              .order_by(QuyenModel.module, QuyenModel.id)
-              .all())
+    quyens = db.query(QuyenModel).filter(QuyenModel.active == True).order_by(QuyenModel.module, QuyenModel.id).all()
+    
+    # ⭐ ĐẢM BẢO mo_ta KHÔNG BỊ NULL
+    result = []
+    for q in quyens:
+        result.append({
+            "id": q.id,
+            "ma_quyen": q.ma_quyen,
+            "ten_quyen": q.ten_quyen,
+            "mo_ta": q.mo_ta or "",  # ⭐ NẾU NULL THÌ TRẢ VỀ CHUỖI RỖNG
+            "module": q.module or "",  # ⭐ NẾU NULL THÌ TRẢ VỀ CHUỖI RỖNG
+        })
+    return result
 
 
 @router.get("/phan-quyen/{vai_tro}", response_model=list[int])

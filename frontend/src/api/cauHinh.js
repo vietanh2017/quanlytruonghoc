@@ -3,6 +3,22 @@ import axios from 'axios';
 
 const API_URL = 'http://localhost:8000/api/v1';
 
+// ============ THÔNG TIN TRƯỜNG ============
+export const thongTinTruongAPI = {
+  get: () => axios.get(`${API_URL}/cau-hinh/thong-tin-truong`),
+  create: (data) => axios.post(`${API_URL}/cau-hinh/thong-tin-truong`, data),
+  update: (data) => axios.put(`${API_URL}/cau-hinh/thong-tin-truong`, data),
+};
+
+// ============ CẤU HÌNH CHUNG (KEY-VALUE) ============
+export const cauHinhChungAPI = {
+  get: (key) => axios.get(`${API_URL}/cau-hinh/cau-hinh?key=${key}`),
+  getAll: () => axios.get(`${API_URL}/cau-hinh/cau-hinh/tat-ca`),
+  create: (data) => axios.post(`${API_URL}/cau-hinh/cau-hinh`, data),
+  update: (key, data) => axios.put(`${API_URL}/cau-hinh/cau-hinh/${key}`, data),
+  delete: (key) => axios.delete(`${API_URL}/cau-hinh/cau-hinh/${key}`),
+};
+
 // ============ NĂM HỌC ============
 export const namHocAPI = {
   getAll: () => axios.get(`${API_URL}/cau-hinh/nam-hoc`),
@@ -37,6 +53,7 @@ export const phanMonAPI = {
   create: (data) => axios.post(`${API_URL}/cau-hinh/phan-mon`, data),
   update: (id, data) => axios.put(`${API_URL}/cau-hinh/phan-mon/${id}`, data),
   delete: (id) => axios.delete(`${API_URL}/cau-hinh/phan-mon/${id}`),
+  deleteByMonHoc: (monHocId) => axios.delete(`${API_URL}/cau-hinh/phan-mon/mon-hoc/${monHocId}`),
 };
 
 // ============ SỐ TIẾT THEO KHỐI ============

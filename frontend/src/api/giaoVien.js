@@ -7,9 +7,10 @@ const api = axios.create({ baseURL: BASE })
 
 export const giaoVienApi = {
   // Lấy danh sách
-  getAll: (includeInactive = false) =>
+  getAll: (includeInactive = true) =>
     api.get(`/giao-vien/?include_inactive=${includeInactive}`),
-
+  // ⭐ THÊM API TÍNH TỔNG TIẾT
+  getTongTiet: (id) => api.get(`/giao-vien/${id}/tong-tiet`),
   // Chi tiết
   getById: (id) => api.get(`/giao-vien/${id}`),
 

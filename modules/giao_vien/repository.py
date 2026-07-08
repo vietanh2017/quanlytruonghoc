@@ -72,6 +72,7 @@ class GiaoVienRepository:
         mon_day: str = "",
         to_id: Optional[int] = None,
         so_dien_thoai: str = "",
+        kiem_nhiem: str = "",  # ⭐ THÊM
         active: bool = True,
     ) -> GiaoVien:
         gv = GiaoVien(
@@ -80,6 +81,7 @@ class GiaoVienRepository:
             mon_day=mon_day,
             to_id=to_id,
             so_dien_thoai=so_dien_thoai,
+            
             active=active,
         )
         self.s.add(gv)
@@ -91,7 +93,8 @@ class GiaoVienRepository:
         if not gv:
             return None
 
-        gv_fields = {"ma_giao_vien", "mon_day", "to_id", "so_dien_thoai", "active"}
+        # ⭐ THÊM 'kiem_nhiem' VÀO DANH SÁCH
+        gv_fields = {"ma_giao_vien", "mon_day", "to_id", "so_dien_thoai", "active", "kiem_nhiem"}
         for key, value in data.items():
             if key in gv_fields and hasattr(gv, key):
                 setattr(gv, key, value)
